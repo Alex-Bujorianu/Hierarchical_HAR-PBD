@@ -75,7 +75,7 @@ def MakeGraph():
     Adj[20, 19] = 1
     Adj[20, 21] = 1
     Adj[21, 20] = 1
-
+    #print(Adj)
 # 2. define the diagonal 22X22 degree matrix.
     Degree = np.zeros((22, 22))
     Degree[0, 0] = 3

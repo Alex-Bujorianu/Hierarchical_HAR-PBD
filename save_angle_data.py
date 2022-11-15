@@ -16,8 +16,7 @@ print("There are ", len(activity_labels), " labels")
 datafolderpath = os.getcwd() + "/" + "EmoPainAtHome"
 all_data = loadalldata(datafolderpath)
 
-print("All data ", all_data)
-
+print(all_data['63'])
 rightjointids = {'chestbottom': "ChestBottom", 'thigh': "RightThigh", 'upperarm': "RightUpperArm",
                  'lowerleg': "RightLowerLeg", 'forearm': "RightForeArm", 'hip': "Hip"}
 joints = ['chestbottom', 'thigh', 'upperarm', 'lowerleg', 'forearm', 'hip']
@@ -31,12 +30,12 @@ def count_session_length(arg: dict) -> int:
                 return len(arg[key])
 
 for key, dic in all_data.items():
-    print("key: ", key)
+    #print("key: ", key)
     one_session = np.empty((0, 6, 3))
     for session in dic:
         print("Session: ", session)
         length = count_session_length(dic[session])
-        print(length)
+        #print(length)
         #columns = dic[session][rightjointids[joints[0]]].reshape(-1, 1, 3)
         columns = np.empty((length, 1, 3))
         for j in range(0, len(joints)):
@@ -97,7 +96,7 @@ def window(data: np.ndarray, window_time=3, sampling_rate=40):
 def windowify():
     for key,value in new_data.items():
         # print("Windowed array: ", window(value))
-        # print("Shape of windowed array: ", window(value).shape)
+        print("Shape of windowed array: ", window(value).shape)
         new_data[key] = window(value)
 
 windowify()
@@ -108,7 +107,7 @@ def convert_to_angles():
         new_data[key] = get_half_skel_joint_angles(value)
 
 convert_to_angles()
-print(new_data)
+#print(new_data)
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, np.ndarray):

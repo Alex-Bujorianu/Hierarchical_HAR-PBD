@@ -87,13 +87,17 @@ def calculate_time(var: dict, start_position: float) -> float:
 def find_nearest_key(var: dict, time: float):
     list_of_keys = list(var.keys())
     print("Keys in X: ", list_of_keys)
+    if time >= list_of_keys[-1]:
+        return list_of_keys[-1]
     for i in range(len(list_of_keys)-1):
-        # label time may be a few seconds earlier than sensor recording time
-        # so added a bit of fuzziness
-        if time>=list_of_keys[-1]:
-            return list_of_keys[-1]
-        if (time>=list_of_keys[i]-3) and (time<=list_of_keys[i+1]):
-            return list_of_keys[i]
+        if (time>=list_of_keys[i]) and (time<=list_of_keys[i+1]):
+            distance_to_Xt = abs(time-list_of_keys[i])
+            distance_to_Xt_1 = abs(time-list_of_keys[i+1])
+            if distance_to_Xt < distance_to_Xt_1:
+                return list_of_keys[i]
+            else:
+                return list_of_keys[i+1]
+
     # case in which given key is less than smallest key available
     return list_of_keys[0]
 

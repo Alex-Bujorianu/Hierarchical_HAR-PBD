@@ -229,6 +229,10 @@ Y_test = data_tuple[3]
 
 # Jitter training data
 X_train = np.concatenate((X_train, gauss_noise(X_train, 5)), axis=0)
+print(X_train.shape)
+# Duplicate labels
+Y_train = np.concatenate((Y_train, Y_train), axis=0)
+print(Y_train.shape)
 # Angles can be negative after jittering
 # so add 360 or make it 0, or keep it negative
 # Nadia says 0 is the best
@@ -250,4 +254,9 @@ def make_positive(input_arr: np.ndarray) -> np.ndarray:
 
 
 make_positive(X_train)
-print(X_train.shape)
+
+# Save
+np.save(arr=X_train, file="Data/X_train")
+np.save(arr=Y_train, file="Data/Y_train")
+np.save(arr=X_test, file="Data/X_test")
+np.save(arr=Y_test, file="Data/Y_test")

@@ -48,7 +48,7 @@ def print_in_common(X, Y):
             if othr_key in Y[key]:
                 print("Key in common: ", othr_key)
 
-print_in_common(X_test, Y_test)
+#print_in_common(X_test, Y_test)
 # The activity label timestamps don’t match the X timestamps
 # Matching by seconds is too exact
 # There shouldn’t be duplicates because Python enforces uniqueness
@@ -64,15 +64,37 @@ def typecast_to_int(timestamp: str) -> int:
     return datetime_object.timestamp()
 
 def sort_dict(input_dict: dict) -> dict:
-    new_dict ={}
+    to_return = input_dict.copy()
     for key, val in input_dict.items():
-        new_dict[typecast_to_int(key)] = val
-    return dict(sorted(new_dict.items()))
+        new_dict = {typecast_to_int(k):v for (k,v) in val.items()}
+        for othrkey, othrval in val.items():
+            to_return[key] = dict(sorted(new_dict.items()))
+    return to_return
 
-for key,val in Y_train.items():
-    print("Sorted dict: ", sort_dict(val).keys())
-    break
+#print(Y_train.keys())
+print("Sorted dict: ", sort_dict(Y_train)['39'])
 
+def calculate_time(var: dict, start_position: float) -> float:
+    # Calculates how long an activity lasts in continuous time
+    # for a single step (because steps are uneven)
+    # So just the difference between key_n and key_n+1
+    list_of_keys = list(var.keys())
+    for i in range(len(list_of_keys)-1):
+        if list_of_keys[i] == start_position:
+            return list_of_keys[i+1] - list_of_keys[i]
+
+def find_nearest_key(var: dict, time: float):
+    list_of_keys = list(var.keys())
+    for i in range(len(list_of_keys)):
+        # label time may be a few seconds earlier than sensor recording time
+        # so added a bit of fuzziness
+        if time>=list_of_keys[i]-3:
+            return list_of_keys[i]
+        else:
+            return list_of_keys[0]
+
+
+assert calculate_time(sort_dict(Y_train)['39'], 1616605980) == 60
 
 def get_data(X_train: dict, X_test: dict, Y_train: dict, Y_test: dict):
     #@return: returns a tuple of 4 numpy arrays
@@ -81,20 +103,44 @@ def get_data(X_train: dict, X_test: dict, Y_train: dict, Y_test: dict):
     Y_train_numpy = np.empty((0, 120))
     X_test_numpy = np.empty((0, 120, 4, 3))
     Y_test_numpy = np.empty((0, 120))
-    X_train = truncate_seconds(X_train)
-    X_test = truncate_seconds(X_test)
-    Y_train = truncate_seconds(Y_train)
-    Y_test = truncate_seconds(Y_test)
-    for key, value in X_train.items():
+    # X_train = truncate_seconds(X_train)
+    # X_test = truncate_seconds(X_test)
+    # Y_train = truncate_seconds(Y_train)
+    # Y_test = truncate_seconds(Y_test)
+    X_train = sort_dict(X_train)
+    X_test = sort_dict(X_test)
+    Y_train = sort_dict(Y_train)
+    Y_test = sort_dict(Y_test)
+    for key, value in Y_train.items():
+        frames_within_current_key = 0
+        X_keys = []
         for othr_key, val in value.items():
+            print("Val: ", val)
             #print("Key and other key: ", key, " ", othr_key)
-            val = np.array(val)
             #print("Value shape: ", val.shape)
-            if othr_key in Y_train[key]:
-                X_train_numpy = np.vstack((X_train_numpy, val))
-                Y_train_numpy = np.concatenate((Y_train_numpy, np.repeat(
-                    np.array(Y_train[key][othr_key]),
-                    val.shape[0] * val.shape[1]).reshape(-1, 120)), axis=0)
+            print("X train keys: ", list(X_train[key].keys()))
+            print("Othr key: ", othr_key)
+            nearest_key = find_nearest_key(X_train[key], othr_key)
+            print("Nearest key: ", nearest_key)
+            X_keys.append(nearest_key)
+            print("X keys list: ", X_keys)
+            X_session = np.array(X_train[key][nearest_key])
+            # Turns out each activity lasts for a minute
+            length_of_step = 60
+            #print("Length of activity ", length_of_step)
+            # sampling rate is 40hz
+            # It is assumed that the sensor data recording is longer than the activity
+            print("Frames within current key ", frames_within_current_key)
+            print(frames_within_current_key + (length_of_step * 40))
+            little_bit = X_session[frames_within_current_key:int(frames_within_current_key+(length_of_step*40))]
+            X_train_numpy = np.vstack((X_train_numpy, little_bit))
+            frames_within_current_key += int(length_of_step * 40)
+            # Key has changed? Reset frame count
+            if nearest_key != X_keys[-1]:
+                frames_within_current_key = 0
+            Y_train_numpy = np.concatenate((Y_train_numpy, np.repeat(
+                np.array(val),
+                little_bit.shape[0] * little_bit.shape[1]).reshape(-1, 120)), axis=0)
     for key, value in X_test.items():
         #print(value.keys())
         for othr_key, val in value.items():

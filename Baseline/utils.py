@@ -28,6 +28,14 @@ from keras.callbacks import TensorBoard
 from numpy.linalg import inv
 from scipy.linalg import fractional_matrix_power
 
+#jittering(Gaussian Noise)
+def gauss_noise(data, dev):
+    # data(N*180*66)
+    #dev is deviation
+    noise = np.random.normal(0, dev, data.shape)
+    data_jitternig = data + noise
+    return data_jitternig
+
 def MakeGraph():
 # This function is used for the situation where the target graph can be easily & manually defined.
 # Here is an example how we define the graph of human skeleton with 22 nodes.

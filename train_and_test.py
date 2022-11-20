@@ -3,6 +3,7 @@ import numpy as np
 from Baseline.utils import gauss_noise
 from datetime import datetime
 import bisect
+import random
 
 X = json.load(open("angle_data.json", "r"))
 Y = json.load(open("label_data.json", "r"))
@@ -73,7 +74,7 @@ def sort_dict(input_dict: dict) -> dict:
     return to_return
 
 #print(Y_train.keys())
-print("Sorted dict: ", sort_dict(Y_train)['39'])
+#print("Sorted dict: ", sort_dict(Y_train)['39'])
 
 def calculate_time(var: dict, start_position: float) -> float:
     # Calculates how long an activity lasts in continuous time
@@ -86,7 +87,7 @@ def calculate_time(var: dict, start_position: float) -> float:
 
 def find_nearest_key(var: dict, time: float):
     list_of_keys = list(var.keys())
-    print("Keys in X: ", list_of_keys)
+    #print("Keys in X: ", list_of_keys)
     if time >= list_of_keys[-1]:
         return list_of_keys[-1]
     for i in range(len(list_of_keys)-1):
@@ -123,24 +124,24 @@ def get_data(X_train: dict, X_test: dict, Y_train: dict, Y_test: dict):
         Y_keys = []
         X_keys = []
         for othr_key, val in value.items():
-            print("Activity: ", val)
+            #print("Activity: ", val)
             #print("Key and other key: ", key, " ", othr_key)
             #print("Value shape: ", val.shape)
-            print("X train keys: ", list(X_train[key].keys()))
-            print("Othr key: ", othr_key)
+            #print("X train keys: ", list(X_train[key].keys()))
+            #print("Othr key: ", othr_key)
             nearest_key = find_nearest_key(X_train[key], othr_key)
-            print("Nearest key: ", nearest_key)
+            #print("Nearest key: ", nearest_key)
             frames_within_current_key = int((othr_key - nearest_key)*40)
-            print("Frames within current key ", frames_within_current_key)
+            #print("Frames within current key ", frames_within_current_key)
             # Distance should be positive
             # If Y_time is EARLIER than X_time, skip ahead
             if frames_within_current_key < 0:
-                print("Time was negative: ", frames_within_current_key/40,
-                      " Activity was ", val)
+                #print("Time was negative: ", frames_within_current_key/40,
+                      # " Activity was ", val)
                 continue
             X_keys.append(nearest_key)
             Y_keys.append(othr_key)
-            print("Length of Y keys list: ", len(Y_keys))
+            #print("Length of Y keys list: ", len(Y_keys))
             X_session = np.array(X_train[key][nearest_key])
             # Turns out each activity lasts for a minute
             length_of_step = 60
@@ -148,17 +149,17 @@ def get_data(X_train: dict, X_test: dict, Y_train: dict, Y_test: dict):
             # sampling rate is 40hz
             # It is assumed that the sensor data recording is longer than the activity
             # so there are multiple activities within one session
-            print(int(frames_within_current_key+(length_of_step*40)))
+            #print(int(frames_within_current_key+(length_of_step*40)))
             # array is multi-dimensional
             indices_1 = divmod(frames_within_current_key, 120)
             indices_2 = divmod(frames_within_current_key+
                                int((length_of_step*40)), 120)
-            print("First indices: ", indices_1[0], indices_2[0])
-            print("Second indices: ", indices_1[1], indices_2[1])
-            print("X session shape: ", X_session.shape)
+            # print("First indices: ", indices_1[0], indices_2[0])
+            # print("Second indices: ", indices_1[1], indices_2[1])
+            # print("X session shape: ", X_session.shape)
             # Select only windows
             little_bit = X_session[indices_1[0]:indices_2[0]]
-            print("Little bit: ", little_bit)
+            # print("Little bit: ", little_bit)
             X_train_numpy = np.vstack((X_train_numpy, little_bit))
             # Make sure this step comes after assignment of little_bit
             # frames_within_current_key += int(length_of_step * 40)
@@ -172,13 +173,13 @@ def get_data(X_train: dict, X_test: dict, Y_train: dict, Y_test: dict):
         Y_keys = []
         X_keys = []
         for othr_key, val in value.items():
-            print("Val: ", val)
+            #print("Val: ", val)
             #print("Key and other key: ", key, " ", othr_key)
             #print("Value shape: ", val.shape)
-            print("X train keys: ", list(X_test[key].keys()))
-            print("Othr key: ", othr_key)
+            # print("X train keys: ", list(X_test[key].keys()))
+            # print("Othr key: ", othr_key)
             nearest_key = find_nearest_key(X_test[key], othr_key)
-            print("Nearest key: ", nearest_key)
+            # print("Nearest key: ", nearest_key)
             frames_within_current_key = int((othr_key - nearest_key)*40)
             # Distance should be positive
             # If Y_time is EARLIER than X_time, skip ahead
@@ -186,26 +187,26 @@ def get_data(X_train: dict, X_test: dict, Y_train: dict, Y_test: dict):
                 continue
             X_keys.append(nearest_key)
             Y_keys.append(othr_key)
-            print("Y keys list: ", Y_keys)
+            # print("Y keys list: ", Y_keys)
             X_session = np.array(X_test[key][nearest_key])
-            print("X sessio shaoe: ", X_session.shape)
+            # print("X sessio shaoe: ", X_session.shape)
             # Turns out each activity lasts for a minute
             length_of_step = 60
             #print("Length of activity ", length_of_step)
             # sampling rate is 40hz
             # It is assumed that the sensor data recording is longer than the activity
             # so there are multiple activities within one session
-            print("Frames within current key ", frames_within_current_key)
-            print(int(frames_within_current_key+(length_of_step*40)))
+            # print("Frames within current key ", frames_within_current_key)
+            # print(int(frames_within_current_key+(length_of_step*40)))
             # array is multi-dimensional
             indices_1 = divmod(frames_within_current_key, 120)
             indices_2 = divmod(frames_within_current_key+
                                int((length_of_step*40)), 120)
-            print("First indices: ", indices_1[0], indices_2[0])
-            print("Second indices: ", indices_1[1], indices_2[1])
+            # print("First indices: ", indices_1[0], indices_2[0])
+            # print("Second indices: ", indices_1[1], indices_2[1])
             # Select only windows
             little_bit = X_session[indices_1[0]:indices_2[0]]
-            print("Little bit: ", little_bit)
+            # print("Little bit: ", little_bit)
             X_test_numpy = np.vstack((X_test_numpy, little_bit))
             # Make sure this step comes after assignment of little_bit
             # frames_within_current_key += int(length_of_step * 40)
@@ -217,15 +218,42 @@ def get_data(X_train: dict, X_test: dict, Y_train: dict, Y_test: dict):
                 little_bit.shape[0] * little_bit.shape[1]).reshape(-1, 120)), axis=0)
     return (X_train_numpy, Y_train_numpy, X_test_numpy, Y_test_numpy)
 
+def rebalance_classes(X_train: np.ndarray, Y_train: np.ndarray,
+                      X_test: np.ndarray, Y_test: np.ndarray, split_ratio=0.8):
+    "Rebalance classes between train and test"
+    #@param split_ratio: the fraction that goes into the training test. 80% by default.
+    X = np.concatenate((X_train, X_test), axis=0)
+    Y = np.concatenate((Y_train, Y_test), axis=0)
+    new_X_train = np.empty(shape=(0, X_train.shape[1], X_train.shape[2],
+                                  X_train.shape[3]))
+    new_X_test = np.empty(shape=(0, X_train.shape[1], X_train.shape[2],
+                                  X_train.shape[3]))
+    new_Y_train = np.empty(shape=(0, Y_train.shape[1]))
+    new_Y_test = np.empty(shape=(0, Y_train.shape[1]))
+    for i in range(20, Y.shape[0], 20):
+        # iterate through windows, append 20 windows at a time
+        # 20 windows = 1 minute, minimum length of an activity
+        if random.random() < split_ratio:
+            new_X_train = np.concatenate((new_X_train, X[i-20:i, :, :, :].reshape((20, 120, 4, 3))),
+                                         axis=0)
+            new_Y_train = np.vstack((new_Y_train, Y[i-20:i].reshape((20, 120))))
+        else:
+            new_X_test = np.vstack((new_X_test, X[i-20:i, :, :, :].reshape((20, 120, 4, 3))))
+            new_Y_test = np.vstack((new_Y_test, Y[i-20:i].reshape((20, 120))))
+    return (new_X_train, new_Y_train, new_X_test, new_Y_test)
+
 data_tuple = get_data(X_train, X_test, Y_train, Y_test)
-print("Shape of X train ", data_tuple[0].shape)
-print("Shape of Y train ", data_tuple[1].shape)
-print("Shape of X test ", data_tuple[2].shape)
-print("Shape of Y test ", data_tuple[3].shape)
+data_tuple = rebalance_classes(data_tuple[0], data_tuple[1], data_tuple[2],
+                               data_tuple[3])
 X_train = data_tuple[0]
 Y_train = data_tuple[1]
 X_test = data_tuple[2]
 Y_test = data_tuple[3]
+
+print("Shape of X train ", data_tuple[0].shape)
+print("Shape of Y train ", data_tuple[1].shape)
+print("Shape of X test ", data_tuple[2].shape)
+print("Shape of Y test ", data_tuple[3].shape)
 
 # Jitter training data
 X_train = np.concatenate((X_train, gauss_noise(X_train, 5)), axis=0)

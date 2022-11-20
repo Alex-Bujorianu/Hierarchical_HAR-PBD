@@ -13,7 +13,6 @@ import scipy.io
 import h5py
 import keras
 #import xlwt as xw
-import hdf5storage
 from sklearn.metrics import *
 from keras.layers import *
 from keras.layers.core import *
@@ -27,16 +26,18 @@ from keras.callbacks import EarlyStopping
 from scipy.linalg import fractional_matrix_power
 
 from tensorflow.compat.v1.keras.layers import CuDNNLSTM as LSTM
+import os, sys
+sys.path.append(os.path.dirname(__file__))
 import utils
 
 # the following three functions are needed for the hierarchical connection between HAR and PBD modules, and for the Lambda layer to perform the graph normalization per GCN layer.
 
-def HARExtend(nodefeature):
+def HARExtend(nodefeature, time_step, body_num, class_num):
     # Extend the HAR output from (feature_dim,) to (time_step,body_num,feature_num,), in order to be concatenated with the raw input for the PBD module.
     # Define the value for time_step,body_num,class_num
-    time_step = 180
-    body_num = 22
-    class_num = 6
+    # time_step = 180
+    # body_num = 22
+    # class_num = 6
     
     HARExtend = K.argmax(nodefeature,-1)
     HARExtend = K.one_hot(HARExtend,class_num)
@@ -50,12 +51,14 @@ def HARExtend(nodefeature):
 def output_of_adjmul(input_shape):
     return (input_shape[0],input_shape[1],input_shape[2],input_shape[3])
 
-def adjmul(x):
-    AdjNorm = utils.MakeGraph() # refer to utils.py for this function.
+def adjmul(x, adjacency_matrix):
+    AdjNorm = utils.MakeGraph(adjacency_matrix) # refer to utils.py for this function.
     x = tf.cast(x, tf.float64) # this step could be removed in earlier Tensorflow versions.
     return tf.matmul(AdjNorm,x)
 
-def build_model(timestep,body_num,feature_dim,gcn_units_HAR,lstm_units_HAR,gcn_units_PBD,lstm_units_PBD,num_class_HAR,num_class_PBD):
+def build_model(timestep,body_num,feature_dim, adjacency_matrix,
+                gcn_units_HAR,lstm_units_HAR,gcn_units_PBD,
+                lstm_units_PBD,num_class_HAR,num_class_PBD):
     # timestep=the length of current input data segment.
     # body_num=the number of nodes/joints of the input graph.
     # feature_num=the feature dimension of each node/joint.
@@ -95,19 +98,27 @@ def build_model(timestep,body_num,feature_dim,gcn_units_HAR,lstm_units_HAR,gcn_u
     PBDDropout3 = Dropout(0.5)(PBDLSTM3)
     PBDLSTM = Model(inputs=[PBDsingleinput], outputs=[PBDDropout3])
     
-    
+    print("Timestep: ", timestep, "Body num: ", body_num,
+          "Num classes HAR: ", num_class_HAR)
     # PBD GCN
-    HARextend = Lambda(HARExtend,output_shape=(timestep,body_num,num_class_HAR))(HARTemporaloutput1)
-#     print(HARextend.shape)
+    # Output is not being reshaped, a known bug: https://github.com/tensorflow/tensorflow/issues/33422
+    # Pass parameters to function instead
+    HARextend = Lambda(HARExtend,
+                       arguments={'time_step': timestep,
+                                  'body_num': body_num,
+                                  'class_num': num_class_HAR},
+                       output_shape=(timestep,body_num,num_class_HAR))(HARTemporaloutput1)
+    print(HARextend.shape)
     PBDinputs = concatenate([inputs, HARextend], axis=-1)
 #     print(PBDinputs.shape)
     PBDDense1 = TimeDistributed(Conv1D(gcn_units_PBD, 1, activation='relu'))(PBDinputs)
     PBDDense1 = Dropout(0.5)(PBDDense1)
 #     print(PBDDense1.shape)
-    PBDDense2 = Lambda(adjmul, output_shape=output_of_adjmul)(PBDDense1)
+    PBDDense2 = Lambda(adjmul, arguments={'adjacency_matrix': adjacency_matrix},
+                       output_shape=output_of_adjmul)(PBDDense1)
     PBDDense2 = TimeDistributed(Conv1D(gcn_units_PBD, 1, activation='relu'))(PBDDense2)
     PBDDense2 = Dropout(0.5)(PBDDense2)
-    PBDDense3 = Lambda(adjmul, output_shape=output_of_adjmul)(PBDDense2)
+    PBDDense3 = Lambda(adjmul, arguments={'adjacency_matrix': adjacency_matrix}, output_shape=output_of_adjmul)(PBDDense2)
     PBDDense3 = TimeDistributed(Conv1D(gcn_units_PBD, 1, activation='relu'))(PBDDense3)
     PBDDense3 = Dropout(0.5)(PBDDense3)
     PBDDense4 = Reshape((timestep, body_num * gcn_units_PBD), )(PBDDense3)

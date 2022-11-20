@@ -36,85 +36,98 @@ def gauss_noise(data, dev):
     data_jitternig = data + noise
     return data_jitternig
 
-def MakeGraph():
+def calculate_degree_matrix(adjacency_matrix: np.ndarray) -> np.ndarray:
+    assert  adjacency_matrix.shape[0] == adjacency_matrix.shape[1]
+    degree_matrix = np.zeros((adjacency_matrix.shape[0], adjacency_matrix.shape[1]))
+    for i,j in np.ndindex(adjacency_matrix.shape):
+        degree_matrix[i, i] = np.sum(np.array(adjacency_matrix[i, :]))
+    return degree_matrix
+
+
+def MakeGraph(adjacency_matrix):
 # This function is used for the situation where the target graph can be easily & manually defined.
 # Here is an example how we define the graph of human skeleton with 22 nodes.
  # 1. define the 22X22 adjacency matrix .
-    Adj = np.zeros((22, 22))
-    Adj[0, 1] = 1
-    Adj[0, 4] = 1
-    Adj[0, 7] = 1
-    Adj[1, 0] = 1
-    Adj[1, 2] = 1
-    Adj[2, 1] = 1
-    Adj[2, 3] = 1
-    Adj[3, 2] = 1
-    Adj[4, 0] = 1
-    Adj[4, 5] = 1
-    Adj[5, 4] = 1
-    Adj[5, 6] = 1
-    Adj[6, 5] = 1
-    Adj[7, 0] = 1
-    Adj[7, 8] = 1
-    Adj[8, 7] = 1
-    Adj[8, 9] = 1
-    Adj[8, 14] = 1
-    Adj[8, 19] = 1
-    Adj[9, 8] = 1
-    Adj[9, 10] = 1
-    Adj[10, 9] = 1
-    Adj[10, 11] = 1
-    Adj[11, 10] = 1
-    Adj[11, 12] = 1
-    Adj[12, 11] = 1
-    Adj[12, 13] = 1
-    Adj[13, 12] = 1
-    Adj[14, 8] = 1
-    Adj[14, 15] = 1
-    Adj[15, 14] = 1
-    Adj[15, 16] = 1
-    Adj[16, 15] = 1
-    Adj[16, 17] = 1
-    Adj[17, 16] = 1
-    Adj[17, 18] = 1
-    Adj[18, 17] = 1
-    Adj[19, 8] = 1
-    Adj[19, 20] = 1
-    Adj[20, 19] = 1
-    Adj[20, 21] = 1
-    Adj[21, 20] = 1
+    Adj = adjacency_matrix
+    # Adj = np.zeros((22, 22))
+    # Adj[0, 1] = 1
+    # Adj[0, 4] = 1
+    # Adj[0, 7] = 1
+    # Adj[1, 0] = 1
+    # Adj[1, 2] = 1
+    # Adj[2, 1] = 1
+    # Adj[2, 3] = 1
+    # Adj[3, 2] = 1
+    # Adj[4, 0] = 1
+    # Adj[4, 5] = 1
+    # Adj[5, 4] = 1
+    # Adj[5, 6] = 1
+    # Adj[6, 5] = 1
+    # Adj[7, 0] = 1
+    # Adj[7, 8] = 1
+    # Adj[8, 7] = 1
+    # Adj[8, 9] = 1
+    # Adj[8, 14] = 1
+    # Adj[8, 19] = 1
+    # Adj[9, 8] = 1
+    # Adj[9, 10] = 1
+    # Adj[10, 9] = 1
+    # Adj[10, 11] = 1
+    # Adj[11, 10] = 1
+    # Adj[11, 12] = 1
+    # Adj[12, 11] = 1
+    # Adj[12, 13] = 1
+    # Adj[13, 12] = 1
+    # Adj[14, 8] = 1
+    # Adj[14, 15] = 1
+    # Adj[15, 14] = 1
+    # Adj[15, 16] = 1
+    # Adj[16, 15] = 1
+    # Adj[16, 17] = 1
+    # Adj[17, 16] = 1
+    # Adj[17, 18] = 1
+    # Adj[18, 17] = 1
+    # Adj[19, 8] = 1
+    # Adj[19, 20] = 1
+    # Adj[20, 19] = 1
+    # Adj[20, 21] = 1
+    # Adj[21, 20] = 1
     #print(Adj)
 # 2. define the diagonal 22X22 degree matrix.
-    Degree = np.zeros((22, 22))
-    Degree[0, 0] = 3
-    Degree[1, 1] = 2
-    Degree[2, 2] = 2
-    Degree[3, 3] = 1
-    Degree[4, 4] = 2
-    Degree[5, 5] = 2
-    Degree[6, 6] = 1
-    Degree[7, 7] = 2
-    Degree[8, 8] = 4
-    Degree[9, 9] = 2
-    Degree[10, 10] = 2
-    Degree[11, 11] = 2
-    Degree[12, 12] = 2
-    Degree[13, 13] = 1
-    Degree[14, 14] = 2
-    Degree[15, 15] = 2
-    Degree[16, 16] = 2
-    Degree[17, 17] = 2
-    Degree[18, 18] = 1
-    Degree[19, 19] = 2
-    Degree[20, 20] = 2
-    Degree[21, 21] = 1
+#     Degree = np.zeros((22, 22))
+#     Degree[0, 0] = 3
+#     Degree[1, 1] = 2
+#     Degree[2, 2] = 2
+#     Degree[3, 3] = 1
+#     Degree[4, 4] = 2
+#     Degree[5, 5] = 2
+#     Degree[6, 6] = 1
+#     Degree[7, 7] = 2
+#     Degree[8, 8] = 4
+#     Degree[9, 9] = 2
+#     Degree[10, 10] = 2
+#     Degree[11, 11] = 2
+#     Degree[12, 12] = 2
+#     Degree[13, 13] = 1
+#     Degree[14, 14] = 2
+#     Degree[15, 15] = 2
+#     Degree[16, 16] = 2
+#     Degree[17, 17] = 2
+#     Degree[18, 18] = 1
+#     Degree[19, 19] = 2
+#     Degree[20, 20] = 2
+#     Degree[21, 21] = 1
+#     assert Degree.all() == calculate_degree_matrix(Adj).all()
+#     print("Degree matrix: \n", Degree)
+#     print("Calculated degree matrix: \n", calculate_degree_matrix(Adj))
 
 # 3. compute and output the normalized adjacency matrix, referring to Equation 1 in the paper.
-    AdjIden = np.identity(22)
-    Degree1 = Degree + AdjIden
-    Adj1 = Adj + AdjIden
-    DegreePower = fractional_matrix_power(Degree1, -0.5)
-    AdjNorm = np.matmul(np.matmul(DegreePower, Adj1), DegreePower)
+    Degree = calculate_degree_matrix(Adj)
+    I = np.identity(adjacency_matrix.shape[0])
+    Degree_hat = Degree + I
+    Adj_hat = Adj + I
+    DegreePower = fractional_matrix_power(Degree_hat, -0.5)
+    AdjNorm = np.matmul(np.matmul(DegreePower, Adj_hat), DegreePower)
 
     return AdjNorm
 

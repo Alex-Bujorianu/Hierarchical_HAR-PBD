@@ -25,7 +25,6 @@ from keras import backend as K
 from keras.callbacks import EarlyStopping
 from scipy.linalg import fractional_matrix_power
 
-from tensorflow.compat.v1.keras.layers import CuDNNLSTM as LSTM
 import os, sys
 sys.path.append(os.path.dirname(__file__))
 import utils

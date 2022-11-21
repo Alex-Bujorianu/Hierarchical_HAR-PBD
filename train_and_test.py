@@ -105,9 +105,9 @@ def get_data(X_train: dict, X_test: dict, Y_train: dict, Y_test: dict):
     #@return: returns a tuple of 4 numpy arrays
     # there are 6 sensors but only 4 angles
     X_train_numpy = np.empty((0, 120, 4, 3))
-    Y_train_numpy = np.empty((0, 120))
+    Y_train_numpy = np.empty((0, 1))
     X_test_numpy = np.empty((0, 120, 4, 3))
-    Y_test_numpy = np.empty((0, 120))
+    Y_test_numpy = np.empty((0, 1))
     # X_train = truncate_seconds(X_train)
     # X_test = truncate_seconds(X_test)
     # Y_train = truncate_seconds(Y_train)
@@ -147,7 +147,7 @@ def get_data(X_train: dict, X_test: dict, Y_train: dict, Y_test: dict):
             X_train_numpy = np.vstack((X_train_numpy, little_bit))
             Y_train_numpy = np.concatenate((Y_train_numpy, np.repeat(
                 np.array(val),
-                little_bit.shape[0] * little_bit.shape[1]).reshape(-1, 120)), axis=0)
+                little_bit.shape[0]).reshape(-1, 1)), axis=0)
     for key, value in Y_test.items():
         Y_keys = []
         X_keys = []
@@ -178,7 +178,7 @@ def get_data(X_train: dict, X_test: dict, Y_train: dict, Y_test: dict):
             X_test_numpy = np.vstack((X_test_numpy, little_bit))
             Y_test_numpy = np.concatenate((Y_test_numpy, np.repeat(
                 np.array(val),
-                little_bit.shape[0] * little_bit.shape[1]).reshape(-1, 120)), axis=0)
+                little_bit.shape[0]).reshape(-1, 1)), axis=0)
     return (X_train_numpy, Y_train_numpy, X_test_numpy, Y_test_numpy)
 
 def rebalance_classes(X_train: np.ndarray, Y_train: np.ndarray,
@@ -199,10 +199,10 @@ def rebalance_classes(X_train: np.ndarray, Y_train: np.ndarray,
         if random.random() < split_ratio:
             new_X_train = np.concatenate((new_X_train, X[i-20:i, :, :, :].reshape((20, 120, 4, 3))),
                                          axis=0)
-            new_Y_train = np.vstack((new_Y_train, Y[i-20:i].reshape((20, 120))))
+            new_Y_train = np.vstack((new_Y_train, Y[i-20:i].reshape((20, 1))))
         else:
             new_X_test = np.vstack((new_X_test, X[i-20:i, :, :, :].reshape((20, 120, 4, 3))))
-            new_Y_test = np.vstack((new_Y_test, Y[i-20:i].reshape((20, 120))))
+            new_Y_test = np.vstack((new_Y_test, Y[i-20:i].reshape((20, 1))))
     return (new_X_train, new_Y_train, new_X_test, new_Y_test)
 
 data_tuple = get_data(X_train, X_test, Y_train, Y_test)

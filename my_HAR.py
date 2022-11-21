@@ -5,8 +5,7 @@ import numpy as np
 from collections import Counter
 import h5py
 import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' # enable a clean command line  window. The thing is to define os. before importing tensorflow.
-os.environ["CUDA_VISIBLE_DEVICES"] = '0' # use GPU with ID=0.
+
 import tensorflow as tf
 import keras
 from tensorflow.keras.layers import * # for the new versions of Tensorflow, layers, models, regularizers, and optimizers shall be imported from Tensorflow.
@@ -85,9 +84,9 @@ print("Classes in Y_train: ", np.unique(Y_train))
 def train_model(model: HAR_model_wrapper, X_train: np.ndarray, X_test: np.ndarray,
                 Y_train: np.ndarray, Y_test: np.ndarray):
     AdjNorm = utils.MakeGraph(model.adjacency_matrix)
-    print("Shape of normalised adjacency matrix: ", AdjNorm.shape)
     graphtrain = utils.my_combine(AdjNorm, X_train)
     graphtest = utils.my_combine(AdjNorm, X_test)
+    print("Shape of X train :", X_train.shape)
     print("Shape of Y train before one-hot encoding: ", Y_train.shape)
     # One hot encoding
     Y_train = to_categorical(Y_train, num_classes=model.num_classes)

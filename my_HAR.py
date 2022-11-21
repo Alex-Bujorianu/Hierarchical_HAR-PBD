@@ -2,7 +2,15 @@ from Baseline.HierarchicalHAR_PBD import build_model
 import numpy as np
 import Baseline.utils as utils
 
-adjacency_matrix = np.transpose(np.array([[0, 1], [1, 0], [1, 2], [1, 3], [2, 1], [2, 3], [3, 1], [3, 2]])).reshape((4, 4))
+adjacency_matrix = np.zeros((4, 4))
+adjacency_matrix[0, 1] = 1
+adjacency_matrix[1, 0] = 1
+adjacency_matrix[1, 2] = 1
+adjacency_matrix[1, 3] = 1
+adjacency_matrix[2, 1] = 1
+adjacency_matrix[2, 3] = 1
+adjacency_matrix[3, 1] = 1
+adjacency_matrix[3, 2] = 1
 print("Adjacency matrix: ", adjacency_matrix)
 utils.MakeGraph(adjacency_matrix)
 
@@ -12,6 +20,8 @@ class HAR_model_wrapper():
     node_num = 0
     feature_num = 0
     def __init__(self, adjacency_matrix, timestep, node_num, feature_num, num_class_HAR=26):
+        assert adjacency_matrix.shape[0] == node_num
+        assert adjacency_matrix.shape[1] == node_num
         self.model = build_model(timestep=timestep, body_num=node_num, feature_dim=feature_num,
                               gcn_units_HAR=26, lstm_units_HAR=24, adjacency_matrix=adjacency_matrix,
                               gcn_units_PBD=16, lstm_units_PBD=24,

@@ -261,6 +261,8 @@ print(X_train.shape)
 # Duplicate labels
 Y_train = np.concatenate((Y_train, Y_train), axis=0)
 print(Y_train.shape)
+# Do cropping as well
+
 # Angles can be negative after jittering
 # so add 360 or make it 0, or keep it negative
 # Nadia says 0 is the best

@@ -107,6 +107,34 @@ def train_model(model: HAR_model_wrapper, X_train: np.ndarray, X_test: np.ndarra
               #callbacks=utils.build_callbacks('Model', str(valid_patient)),
               validation_data=(graphtest, Y_test)
               )
+    model.model.save("Models/GC_LSTM_HAR")
 
+try:
+    model = keras.models.load_model("Models/GC_LSTM_HAR")
+except FileNotFoundError:
+    train_model(HARmodel, X_train, X_test, Y_train, Y_test)
+AdjNorm = utils.MakeGraph(HARmodel.adjacency_matrix)
+graphtest = utils.my_combine(AdjNorm, X_test)
+print("Y test before categorical encoding: ", Y_test.shape)
+predictions = model.predict(graphtest)
+print("Shape of predictions: ", predictions.shape)
+print("First predictions: ", predictions[0])
+# Do these numbers actually sum to 1?
+for i in range(predictions.shape[0]):
+    print("Sum: ", np.sum(predictions[0]))
+    break
 
-train_model(HARmodel, X_train, X_test, Y_train, Y_test)
+#Pretty much. So pick the most likely class
+def zeros_and_ones(arr):
+    to_return = np.zeros(shape=arr.shape[0])
+    for i in range(arr.shape[0]):
+        print("Index of biggest number: ", np.argmax(arr[i]))
+        to_return[i] = np.argmax(arr[i])
+    return to_return
+
+# Transform predictions back to original shape
+predictions = zeros_and_ones(predictions)
+print("F1 score ", f1_score(Y_test, predictions, average='weighted'))
+print("Accuracy ", accuracy_score(Y_test, predictions))
+print("Precision ", precision_score(Y_test, predictions, average='weighted'))
+print("Recall ", recall_score(Y_test, predictions, average='weighted'))

@@ -151,6 +151,24 @@ def crop(dimension, start, end):
             return x[:, :, :, :, start: end]
     return Lambda(func)
 
+# I don't understand why there are 2 cropping functions
+#Cropping
+def cropping(data,prob):
+    #prob is the probability of dropping
+    time_step = data.shape[1]
+    node_num = data.shape[2]
+    num_samples = data.shape[0]
+
+    for i in range(num_samples):
+        drop_samples = np.random.randint(0, time_step, int(round(time_step*prob)))
+        for j in drop_samples:
+            drop_nodes = np.random.randint(0, node_num, int(round(node_num*prob)))
+            for k in drop_nodes:
+                data[i,j,k] = 0
+                data[i,j,k+node_num] = 0
+                data[i,j,k+node_num*2] = 0
+    return data
+
 def focal_loss(weights=None, gamma=None, num_class=None):
 # the focal loss.
     if weights is None:
@@ -223,6 +241,19 @@ def build_callbacks(modelname,person):
                             # TensorBoard(log_dir='dir/logfolder') # Add yours to check the TensorBoard
                           ]
     return  callbacks
+
+def my_combine(AdjNorm, X):
+    #@param AdjNorm: the normalized adjacency matrix
+    #@param X: the B X T X node_num X dimensions array
+    # For the EmoPain@Home dataset, node_num=4 angles and they have 3 dimensions
+    "Basically, matrix multiply the last 2 dimensions in X with the norm adj matrix"
+    X_copy = X.copy()
+    assert AdjNorm.shape[1] == X.shape[2]
+    for i in range(X.shape[0]):
+        for j in range(X.shape[1]):
+            result = np.matmul(AdjNorm, X[i, j, :, :])
+            X_copy[i, j, :, :] = result
+    return X_copy
 
 def combine(Adj, X, time_step, node_num, feature_num):
 # Transfer the input matrix X (NxTxD) into graph sequences (N x T x node_num x feature_num) as input

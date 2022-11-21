@@ -108,7 +108,7 @@ def build_model(timestep,body_num,feature_dim, adjacency_matrix,
                                   'body_num': body_num,
                                   'class_num': num_class_HAR},
                        output_shape=(timestep,body_num,num_class_HAR))(HARTemporaloutput1)
-    print(HARextend.shape)
+    print("HARextend shape: ", HARextend.shape)
     PBDinputs = concatenate([inputs, HARextend], axis=-1)
 #     print(PBDinputs.shape)
     PBDDense1 = TimeDistributed(Conv1D(gcn_units_PBD, 1, activation='relu'))(PBDinputs)
@@ -131,7 +131,7 @@ def build_model(timestep,body_num,feature_dim, adjacency_matrix,
     #model = Model(inputs=[inputs], outputs=[PBDTemporaloutput1])
     model = Model(inputs=[inputs], outputs=[HARTemporaloutput1, PBDTemporaloutput1])    #final model, one input and two output(HAR,PDB)
     
-    print(HARTemporaloutput1.shape)
-    print(PBDTemporaloutput1.shape)
+    print("HAR temporal output1 shape: ", HARTemporaloutput1.shape)
+    print("PDB temporal output1 shape ", PBDTemporaloutput1.shape)
 
     return model, HARmodel

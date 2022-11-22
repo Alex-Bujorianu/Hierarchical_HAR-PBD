@@ -5,7 +5,7 @@ import numpy as np
 from collections import Counter
 import h5py
 import os
-
+from viz import merge_option_1, merge_option_2
 import tensorflow as tf
 import keras
 from tensorflow.keras.layers import * # for the new versions of Tensorflow, layers, models, regularizers, and optimizers shall be imported from Tensorflow.
@@ -71,6 +71,9 @@ X_train = np.load("Data/X_train.npy")
 Y_train = np.load("Data/Y_train.npy")
 X_test = np.load("Data/X_test.npy")
 Y_test = np.load("Data/Y_test.npy")
+# Option for merging. Make sure to call this before -1
+merge_option_2(Y_train)
+merge_option_2(Y_test)
 result = np.matmul(norm_adj, X_train[0, 0, :, :])
 print("Result of matrix multiplication of normalized adjacency matrix with "
       "4x3 matrix from X[0, 0]: ", result,
@@ -108,11 +111,13 @@ def train_model(model: HAR_model_wrapper, X_train: np.ndarray, X_test: np.ndarra
               validation_data=(graphtest, Y_test)
               )
     model.model.save("Models/GC_LSTM_HAR")
+    return model.model
 
-try:
+train = bool(input("Train model? True/False"))
+if train:
+    model = train_model(HARmodel, X_train, X_test, Y_train, Y_test)
+else:
     model = keras.models.load_model("Models/GC_LSTM_HAR")
-except FileNotFoundError:
-    train_model(HARmodel, X_train, X_test, Y_train, Y_test)
 AdjNorm = utils.MakeGraph(HARmodel.adjacency_matrix)
 graphtest = utils.my_combine(AdjNorm, X_test)
 print("Y test before categorical encoding: ", Y_test.shape)

@@ -9,7 +9,7 @@ import numpy as np
 from collections import Counter
 import h5py
 import os
-from viz import merge_option_1, merge_option_2
+from helper import merge_option_1, merge_option_2
 import tensorflow as tf
 import keras
 from tensorflow.keras.layers import * # for the new versions of Tensorflow, layers, models, regularizers, and optimizers shall be imported from Tensorflow.

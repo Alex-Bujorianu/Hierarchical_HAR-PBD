@@ -163,7 +163,7 @@ for i in range(predictions.shape[0]):
 def zeros_and_ones(arr):
     to_return = np.zeros(shape=arr.shape[0])
     for i in range(arr.shape[0]):
-        print("Index of biggest number: ", np.argmax(arr[i]))
+        # print("Index of biggest number: ", np.argmax(arr[i]))
         to_return[i] = np.argmax(arr[i])
     return to_return
 

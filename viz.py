@@ -2,7 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
 import pandas as pd
-
+import json
+from sklearn.metrics import ConfusionMatrixDisplay
 Y_train = np.load("Data/Y_train.npy")
 Y_test = np.load("Data/Y_test.npy")
 
@@ -30,7 +31,6 @@ plt.xticks(list(test_labels.keys()))
 fig = plt.gcf()
 fig.set_size_inches(12.0, 8)
 plt.show()
-
 labels_csv = pd.read_csv("EmoPainAtHome/rand_labels.csv")
 def create_mapping(data: pd.DataFrame) -> dict:
     mappings = {}
@@ -40,6 +40,14 @@ def create_mapping(data: pd.DataFrame) -> dict:
         mappings[labels[i]] = codes[i]
     return mappings
 
-print(create_mapping(labels_csv))
+mappings = create_mapping(labels_csv)
+print(mappings)
 
-
+conf_matrix_cfcc = np.array(json.load(open("Results/Experiment_CFCCLoss", "r"))['Confusion matrix'])
+conf_matrix_catloss = np.array(json.load(open("Results/Experiment_StandardCategoricalLoss", "r"))['Confusion matrix'])
+disp = ConfusionMatrixDisplay(confusion_matrix=conf_matrix_cfcc)
+disp.plot()
+plt.show()
+disp = ConfusionMatrixDisplay(confusion_matrix=conf_matrix_catloss)
+disp.plot()
+plt.show()

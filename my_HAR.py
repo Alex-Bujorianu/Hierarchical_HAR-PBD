@@ -77,9 +77,9 @@ Y_test = np.load("Data/Y_test.npy")
 merge_option_1(Y_train)
 merge_option_1(Y_test)
 result = np.matmul(norm_adj, X_train[0, 0, :, :])
-print("Result of matrix multiplication of normalized adjacency matrix with "
-      "4x3 matrix from X[0, 0]: ", result,
-      "and its shape: ", result.shape)
+# print("Result of matrix multiplication of normalized adjacency matrix with "
+#       "4x3 matrix from X[0, 0]: ", result,
+#       "and its shape: ", result.shape)
 
 #Tensorflow expects classes to start from 0, otherwise it throws a fit
 Y_train = Y_train - 1
@@ -111,25 +111,23 @@ def train_model(model: HAR_model_wrapper, X_train: np.ndarray, X_test: np.ndarra
     AdjNorm = utils.MakeGraph(model.adjacency_matrix)
     graphtrain = utils.my_combine(AdjNorm, X_train)
     graphtest = utils.my_combine(AdjNorm, X_test)
-    print("Shape of X train :", X_train.shape)
-    print("Shape of Y train before one-hot encoding: ", Y_train.shape)
+    # print("Shape of X train :", X_train.shape)
+    # print("Shape of Y train before one-hot encoding: ", Y_train.shape)
     class_counts = np.unique(Y_train, return_counts=True)
     class_counts = add_missing_labels(class_counts)
     print("Class counts: ", class_counts)
     # One hot encoding
     Y_train = to_categorical(Y_train, num_classes=model.num_classes)
     Y_test = to_categorical(Y_test, num_classes=model.num_classes)
-    print("Shape of categorically encoded Y_train: ", Y_train.shape)
-    print("Shape of categorically encoded Y_test: ", Y_test.shape)
-    # Beta = 0.9999 produces a really small loss which makes it hard
-    # for the model to update its weights
-    # Beta = 0.3
+    # print("Shape of categorically encoded Y_train: ", Y_train.shape)
+    # print("Shape of categorically encoded Y_test: ", Y_test.shape)
+    # Beta = 0.9999 produces a really small loss
     model.model.compile(optimizer=Adam(learning_rate=5e-4, decay=1e-5),
                   loss={
-                        #'HARout': 'categorical_crossentropy'
-                        'HARout': utils.focal_loss(weights = utils.class_balance_weights(0.30,
-                                     list(class_counts.values())),
-                                     gamma=5, num_class=model.num_classes)
+                        'HARout': 'categorical_crossentropy'
+                        # 'HARout': utils.focal_loss(weights = utils.class_balance_weights(0.30,
+                        #              list(class_counts.values())),
+                        #              gamma=5, num_class=model.num_classes)
                         },
                   loss_weights={'HARout': 1.},
                   metrics=['categorical_accuracy'])

@@ -1,5 +1,9 @@
-from Baseline.HierarchicalHAR_PBD import build_model
 import numpy as np
+from numpy.random import seed
+seed(1)
+from tensorflow.random import set_seed
+set_seed(2)
+from Baseline.HierarchicalHAR_PBD import build_model
 import Baseline.utils as utils
 import numpy as np
 from collections import Counter
@@ -29,6 +33,7 @@ from sklearn.metrics import confusion_matrix, f1_score, precision_score, recall_
 from sklearn import metrics
 import seaborn as sns
 import pandas as pd
+import json
 
 adjacency_matrix = np.zeros((4, 4))
 adjacency_matrix[0, 1] = 1
@@ -64,16 +69,13 @@ class HAR_model_wrapper():
 
 
 
-HARmodel = HAR_model_wrapper(adjacency_matrix=adjacency_matrix,
-                             timestep=120, node_num=4, feature_num=3)
-
 X_train = np.load("Data/X_train.npy")
 Y_train = np.load("Data/Y_train.npy")
 X_test = np.load("Data/X_test.npy")
 Y_test = np.load("Data/Y_test.npy")
 # Option for merging. Make sure to call this before -1
-merge_option_2(Y_train)
-merge_option_2(Y_test)
+merge_option_1(Y_train)
+merge_option_1(Y_test)
 result = np.matmul(norm_adj, X_train[0, 0, :, :])
 print("Result of matrix multiplication of normalized adjacency matrix with "
       "4x3 matrix from X[0, 0]: ", result,
@@ -84,6 +86,26 @@ Y_train = Y_train - 1
 Y_test = Y_test - 1
 print("Classes in Y_train: ", np.unique(Y_train))
 
+class_counts = np.unique(Y_train, return_counts=True)
+# Add missing labels to class_counts
+def add_missing_labels(class_counts: tuple) -> tuple:
+    labels = class_counts[0]
+    counts = class_counts[1]
+    new_labels = np.array(list(range(0, 26)))
+    # Assume that the labels with 0 samples have 1 sample
+    # to avoid a divide by zero error
+    # the effect of this assumption is quite negligible
+    new_counts = np.ones(shape=(26,))
+    print(new_counts)
+    res = {new_labels[i]: new_counts[i] for i in range(len(new_labels))}
+    for i in range(len(labels)):
+        res[labels[i]] = counts[i]
+    return res
+
+HARmodel = HAR_model_wrapper(adjacency_matrix=adjacency_matrix,
+                             timestep=120, node_num=4, feature_num=3)
+
+
 def train_model(model: HAR_model_wrapper, X_train: np.ndarray, X_test: np.ndarray,
                 Y_train: np.ndarray, Y_test: np.ndarray):
     AdjNorm = utils.MakeGraph(model.adjacency_matrix)
@@ -91,14 +113,23 @@ def train_model(model: HAR_model_wrapper, X_train: np.ndarray, X_test: np.ndarra
     graphtest = utils.my_combine(AdjNorm, X_test)
     print("Shape of X train :", X_train.shape)
     print("Shape of Y train before one-hot encoding: ", Y_train.shape)
+    class_counts = np.unique(Y_train, return_counts=True)
+    class_counts = add_missing_labels(class_counts)
+    print("Class counts: ", class_counts)
     # One hot encoding
     Y_train = to_categorical(Y_train, num_classes=model.num_classes)
     Y_test = to_categorical(Y_test, num_classes=model.num_classes)
     print("Shape of categorically encoded Y_train: ", Y_train.shape)
     print("Shape of categorically encoded Y_test: ", Y_test.shape)
+    # Beta = 0.9999 produces a really small loss which makes it hard
+    # for the model to update its weights
+    # Beta = 0.3
     model.model.compile(optimizer=Adam(learning_rate=5e-4, decay=1e-5),
                   loss={
-                        'HARout': 'categorical_crossentropy'
+                        #'HARout': 'categorical_crossentropy'
+                        'HARout': utils.focal_loss(weights = utils.class_balance_weights(0.30,
+                                     list(class_counts.values())),
+                                     gamma=5, num_class=model.num_classes)
                         },
                   loss_weights={'HARout': 1.},
                   metrics=['categorical_accuracy'])
@@ -113,10 +144,11 @@ def train_model(model: HAR_model_wrapper, X_train: np.ndarray, X_test: np.ndarra
     model.model.save("Models/GC_LSTM_HAR")
     return model.model
 
-train = bool(input("Train model? True/False"))
-if train:
+train = input("Train model? Yes/no")
+if train=="Yes":
     model = train_model(HARmodel, X_train, X_test, Y_train, Y_test)
 else:
+    print("Loading model…")
     model = keras.models.load_model("Models/GC_LSTM_HAR")
 AdjNorm = utils.MakeGraph(HARmodel.adjacency_matrix)
 graphtest = utils.my_combine(AdjNorm, X_test)
@@ -139,7 +171,20 @@ def zeros_and_ones(arr):
 
 # Transform predictions back to original shape
 predictions = zeros_and_ones(predictions)
+# Save results
+results = {"F1 score": f1_score(Y_test, predictions, average='weighted'),
+           "Accuracy": accuracy_score(Y_test, predictions),
+           "Precision": precision_score(Y_test, predictions, average='weighted'),
+           "Recall": recall_score(Y_test, predictions, average='weighted'),
+           "Confusion matrix": confusion_matrix(Y_test, predictions)}
 print("F1 score ", f1_score(Y_test, predictions, average='weighted'))
 print("Accuracy ", accuracy_score(Y_test, predictions))
 print("Precision ", precision_score(Y_test, predictions, average='weighted'))
 print("Recall ", recall_score(Y_test, predictions, average='weighted'))
+name = input("Please name this experiment")
+class NumpyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return json.JSONEncoder.default(self, obj)
+json.dump(results, open("Results/Experiment_" + name, "w"), cls=NumpyEncoder)

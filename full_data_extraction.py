@@ -4,7 +4,7 @@ import os
 import numpy as np
 import csv
 import pandas as pd
-from helper import create_mapping
+from helper import create_mapping, window, convert_windowed_array_to_shape
 
 labels_csv = pd.read_csv("EmoPainAtHomeFull/labels.csv")
 
@@ -53,7 +53,9 @@ def get_all_data(folderpath: str) -> (np.ndarray, np.ndarray):
                         next(reader)
                         arr = list(reader)
                         remove_empty_string(arr)
-                        arr = np.array(arr, dtype=object)
+                        # This typecasting is necessary
+                        float_arr = [[float(y) for y in x] for x in arr]
+                        arr = np.array(float_arr, dtype=object)
                         # Can't hstack, so vstack then reshape
                         columns = np.vstack((columns, arr))
                     columns = columns.reshape(-1, 6, 3)
@@ -70,6 +72,17 @@ def get_all_data(folderpath: str) -> (np.ndarray, np.ndarray):
     Y = np.array(Y, dtype=object)
     return (X, Y)
 
+X = np.arange(1, 13)
+print("Final result: ", window(X, 4, 1, 0.5))
+X = np.arange(1, 17)
+print("Another test: ", window(X, 4, 1, 0.5))
 X, Y = get_all_data("EmoPainAtHomeFull")
 print("Shape of X: ", X.shape)
 print("Shape of Y: ", Y.shape)
+X = window(X, 3, 40, overlap=0.5)
+#X = X.reshape(-1, 120, 6, 3)
+X = convert_windowed_array_to_shape(X)
+print("X after windowing ", X.shape)
+Y = window(Y, 3, 40, overlap=0.5)
+Y = convert_windowed_array_to_shape(Y)
+print("Y shape after windowing ", Y.shape)

@@ -6,6 +6,7 @@ import os
 import timeit
 from angleforAlex import get_half_skel_joint_angles
 import json
+from helper import window
 
 #print(MakeGraph())
 
@@ -83,13 +84,7 @@ for key,value in Y.items():
 
 print("Length of datetime ", len(datetime))
 print("Length of activity labels ", len(activity_labels))
-# Need to window to convert 3D to 4D
-def window(data: np.ndarray, window_time=3, sampling_rate=40):
-    to_return = []
-    step = window_time*sampling_rate
-    for i in range(step, len(data), step):
-        to_return.append(data[i-step:i])
-    return np.array(to_return)
+
 
 # Window everything
 # This function is not slow

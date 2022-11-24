@@ -27,6 +27,52 @@ from keras.callbacks import EarlyStopping
 from keras.callbacks import TensorBoard
 from numpy.linalg import inv
 from scipy.linalg import fractional_matrix_power
+from collections import Counter
+
+
+# Segmentation(Sliding Window)
+def segmentation(mat, overlap_ratio, window_len):
+    x_segment = np.zeros((1, 66))
+    y_segment = np.array([[0, 0]])
+    m = len(mat)  # number of rows
+    n = len(mat[0])  # number of columns
+    step = int(window_len * (1 - overlap_ratio))
+
+    length = 0  # length of the data
+    num_frames = 0  # number of frames
+    # if remain length of matrix is samller than a window length, the last window padding with 0
+    while (m - length) > window_len:
+        x_segment = np.concatenate((x_segment, mat[num_frames * step:num_frames * step + window_len, :66]), 0)
+        y_HAR_segment = int(Counter(mat[num_frames * step:num_frames * step + window_len, 70]).most_common(1)[0][0])
+        # standing, sitting, walking and others all considered as transition
+        # number of classes of PBD is 6, including 5 activities and 1 transition
+        if y_HAR_segment == 6 or y_HAR_segment == 7 or y_HAR_segment == 8:
+            y_HAR_segment = 0
+        y_PDB_segment = int(Counter(mat[num_frames * step:num_frames * step + window_len, 72]).most_common(1)[0][0])
+
+        y_segment = np.concatenate((y_segment, [[y_HAR_segment, y_PDB_segment]]), 0)
+        num_frames += 1
+        length = 90 * (num_frames + 1)
+
+        # padding last window with 0
+    len_remain = m - length
+    mat_padding = np.zeros([window_len - len_remain, n])
+    mat_last = np.concatenate((mat[length:, :], mat_padding[:, :]), 0)
+
+    # final concatenation
+    x_segment = np.concatenate((x_segment, mat_last[:, :66]), 0)
+    y_HAR_segment = int(Counter(mat_last[:, 70]).most_common(1)[0][0])
+    if y_HAR_segment == 6 or y_HAR_segment == 7 or y_HAR_segment == 8:
+        y_HAR_segment = 0
+    y_PDB_segment = int(Counter(mat_last[:, 72]).most_common(1)[0][0])
+    y_segment = np.concatenate((y_segment, [[y_HAR_segment, y_PDB_segment]]), 0)
+
+    # reshape the data
+    num_frames = num_frames + 1
+    x_segment = np.reshape(x_segment[1:], (num_frames, window_len, 66))
+    y_segment = y_segment[1:]
+
+    return x_segment, y_segment
 
 #jittering(Gaussian Noise)
 def gauss_noise(data, dev):

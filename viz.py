@@ -20,7 +20,6 @@ def create_dictionary(arr: np.ndarray) -> dict:
 
 train_labels = create_dictionary(Y_train)
 test_labels = create_dictionary(Y_test)
-
 plt.bar(*zip(*train_labels.items()))
 plt.title("Label distribution of training set")
 plt.xticks(list(train_labels.keys()))
@@ -42,6 +41,7 @@ def create_mapping(data: pd.DataFrame) -> dict:
 
 mappings = create_mapping(labels_csv)
 print(mappings)
+print("Sorted labels ", sorted(list(mappings.values())))
 
 conf_matrix_cfcc = np.array(json.load(open("Results/Experiment_CFCC_repro_26l", "r"))['Confusion matrix'])
 print("Length of conf matrix cfcc ", len(conf_matrix_cfcc[0]))

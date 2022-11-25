@@ -1,5 +1,9 @@
 import numpy as np
 import pandas as pd
+import random
+from angleforAlex import get_half_skel_joint_angles
+
+
 # Labels 9, 11 and 20 are basically the same thing
 # 21 and 22 (vacuuming and vacuuming car) are also similar
 # Painting shelves and painting wall?
@@ -67,10 +71,50 @@ def window(data: np.ndarray, window_time=3, sampling_rate=40, overlap=None):
 def convert_windowed_array_to_shape(arr: np.ndarray) -> np.ndarray:
     "After using the window function with overlap, it is not straightforward to reshape the array to the correct dimensions"
     # the last subwindow will likely not have correct shape because arbitrary data will not fit it
-    print((len(arr)-1,) + arr[0].shape)
     arr_to_return = np.empty(shape=(len(arr)-1,) + arr[0].shape)
     # Do not use vstack, numpy arrays are very slow to append
     # Pre-allocate memory in one big array and index
     for i in range(len(arr_to_return)):
         arr_to_return[i] = arr[i]
     return arr_to_return
+
+def convert_windowed_Y_to_shape(arr: np.ndarray) -> np.ndarray:
+    "Instead of a label for every row in the window, 1 label at the start of the window"
+    new_arr = np.empty(shape=(arr.shape[0], 1))
+    for i in range(arr.shape[0]):
+        new_arr[i] = arr[i, 0]
+    return new_arr
+
+# Note: random sampling is NOT necessarily the best approach here
+# We want classes in the train set to be represented in the test set
+# Sampling at random introduces large differences in the distribution of the two sets
+# Although the dataset is large, the classes are many and unbalanced
+# Thus, some classes end up completely unrepresented in the smaller test set
+def rebalance_classes(X: np.ndarray, Y: np.ndarray, split_ratio=0.8, overlap_ratio=0):
+    "Rebalance classes between train and test"
+    #@param split_ratio: the fraction that goes into the training test. 80% by default.
+    X_train = np.empty(shape=(0, X.shape[1], X.shape[2],
+                                  X.shape[3]))
+    X_test = np.empty(shape=(0, X.shape[1], X.shape[2],
+                                  X.shape[3]))
+    Y_train = np.empty(shape=(0, Y.shape[1]))
+    Y_test = np.empty(shape=(0, Y.shape[1]))
+    if not (20/(1-overlap_ratio)).is_integer():
+        raise ValueError("Overlap ratio is not compatible with window size")
+    minute = int(20 / (1-overlap_ratio))
+    for i in range(minute, Y.shape[0], minute):
+        # iterate through windows, append 20 windows at a time
+        # 20 windows = 1 minute, minimum length of an activity
+        # But don't forget to divide by (1-overlap ratio)
+        if random.random() < split_ratio:
+            X_train = np.concatenate((X_train, X[i-minute:i, :, :, :].reshape((minute, 120, 6, 3))),
+                                         axis=0)
+            Y_train = np.vstack((Y_train, Y[i-minute:i].reshape((minute, 1))))
+        else:
+            X_test = np.vstack((X_test, X[i-minute:i, :, :, :].reshape((minute, 120, 6, 3))))
+            Y_test = np.vstack((Y_test, Y[i-minute:i].reshape((minute, 1))))
+    return (X_train, Y_train, X_test, Y_test)
+
+# This function is very slow
+def convert_to_angles(arr: np.ndarray):
+    return get_half_skel_joint_angles(arr)

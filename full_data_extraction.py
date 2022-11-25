@@ -112,7 +112,10 @@ Y = window(Y, 3, 40, overlap=0.5)
 Y = convert_windowed_array_to_shape(Y)
 Y = convert_windowed_Y_to_shape(Y)
 print("Y shape after windowing ", Y.shape)
-X_train, Y_train, X_test, Y_test = rebalance_classes(X, Y, split_ratio=0.8, overlap_ratio=0.5)
+X_train, Y_train, X_test, Y_test = rebalance_classes(X, Y,
+                        split_ratio=0.6, overlap_ratio=0.5)
+print("Y test: ", Y_test)
+print("X test: ", X_test)
 # Sanity check, does the distribution between train/test look reasonable?
 def create_dictionary(arr: np.ndarray) -> dict:
     labels = {}

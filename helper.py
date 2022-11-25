@@ -90,18 +90,41 @@ def convert_windowed_Y_to_shape(arr: np.ndarray) -> np.ndarray:
 # Sampling at random introduces large differences in the distribution of the two sets
 # Although the dataset is large, the classes are many and unbalanced
 # Thus, some classes end up completely unrepresented in the smaller test set
+# Solution: stratified sampling
 def rebalance_classes(X: np.ndarray, Y: np.ndarray, split_ratio=0.8, overlap_ratio=0):
     "Rebalance classes between train and test"
     #@param split_ratio: the fraction that goes into the training test. 80% by default.
+    labels = np.unique(Y)
+    data_dict = dict.fromkeys(labels)
+    for label in labels:
+        indices = np.where(Y==label)[0]
+        data_dict[label] = {'X': X[indices], 'Y': Y[indices]}
+    #print("Data dict: ", data_dict)
+    print("Check shapes: ", data_dict[1]['X'].shape,
+          data_dict[1]['Y'].shape)
+    print("Check Y: ", data_dict[2]['Y'])
     X_train = np.empty(shape=(0, X.shape[1], X.shape[2],
                                   X.shape[3]))
     X_test = np.empty(shape=(0, X.shape[1], X.shape[2],
                                   X.shape[3]))
     Y_train = np.empty(shape=(0, Y.shape[1]))
+    print("Empty Y_train: ", Y_train)
     Y_test = np.empty(shape=(0, Y.shape[1]))
     if not (20/(1-overlap_ratio)).is_integer():
         raise ValueError("Overlap ratio is not compatible with window size")
     minute = int(20 / (1-overlap_ratio))
+    for key, value in data_dict.items():
+        X_train = np.vstack((X_train,
+                             value['X'][0:int(split_ratio*value['X'].shape[0])]))
+        X_test = np.vstack((X_test,
+                             value['X'][int(split_ratio * value['X'].shape[0]):]))
+        print("Subset of Y train: ", value['Y'][0:int(split_ratio * value['Y'].shape[0])])
+        Y_train = np.vstack((Y_train, value['Y'][0:int(split_ratio * value['Y'].shape[0])]))
+        print("Y_train in for loop", Y_train)
+        Y_test = np.vstack((Y_test,
+                            value['Y'][int(split_ratio * value['Y'].shape[0]):]))
+        print("Y_test in for loop", Y_test)
+    return (X_train, Y_train, X_test, Y_test)
     for i in range(minute, Y.shape[0], minute):
         # iterate through windows, append 20 windows at a time
         # 20 windows = 1 minute, minimum length of an activity

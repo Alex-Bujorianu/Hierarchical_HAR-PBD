@@ -1,8 +1,11 @@
 import numpy as np
 import pandas as pd
 import random
+import csv
 from angleforAlex import get_half_skel_joint_angles
-
+import json
+from json import JSONDecodeError
+import os
 
 # Labels 9, 11 and 20 are basically the same thing
 # 21 and 22 (vacuuming and vacuuming car) are also similar
@@ -100,15 +103,11 @@ def rebalance_classes(X: np.ndarray, Y: np.ndarray, split_ratio=0.8, overlap_rat
         indices = np.where(Y==label)[0]
         data_dict[label] = {'X': X[indices], 'Y': Y[indices]}
     #print("Data dict: ", data_dict)
-    print("Check shapes: ", data_dict[1]['X'].shape,
-          data_dict[1]['Y'].shape)
-    print("Check Y: ", data_dict[2]['Y'])
     X_train = np.empty(shape=(0, X.shape[1], X.shape[2],
                                   X.shape[3]))
     X_test = np.empty(shape=(0, X.shape[1], X.shape[2],
                                   X.shape[3]))
     Y_train = np.empty(shape=(0, Y.shape[1]))
-    print("Empty Y_train: ", Y_train)
     Y_test = np.empty(shape=(0, Y.shape[1]))
     if not (20/(1-overlap_ratio)).is_integer():
         raise ValueError("Overlap ratio is not compatible with window size")
@@ -118,26 +117,105 @@ def rebalance_classes(X: np.ndarray, Y: np.ndarray, split_ratio=0.8, overlap_rat
                              value['X'][0:int(split_ratio*value['X'].shape[0])]))
         X_test = np.vstack((X_test,
                              value['X'][int(split_ratio * value['X'].shape[0]):]))
-        print("Subset of Y train: ", value['Y'][0:int(split_ratio * value['Y'].shape[0])])
+        #print("Subset of Y train: ", value['Y'][0:int(split_ratio * value['Y'].shape[0])])
         Y_train = np.vstack((Y_train, value['Y'][0:int(split_ratio * value['Y'].shape[0])]))
-        print("Y_train in for loop", Y_train)
         Y_test = np.vstack((Y_test,
                             value['Y'][int(split_ratio * value['Y'].shape[0]):]))
-        print("Y_test in for loop", Y_test)
+        #print("Y_test in for loop", Y_test)
     return (X_train, Y_train, X_test, Y_test)
-    for i in range(minute, Y.shape[0], minute):
-        # iterate through windows, append 20 windows at a time
-        # 20 windows = 1 minute, minimum length of an activity
-        # But don't forget to divide by (1-overlap ratio)
-        if random.random() < split_ratio:
-            X_train = np.concatenate((X_train, X[i-minute:i, :, :, :].reshape((minute, 120, 6, 3))),
-                                         axis=0)
-            Y_train = np.vstack((Y_train, Y[i-minute:i].reshape((minute, 1))))
-        else:
-            X_test = np.vstack((X_test, X[i-minute:i, :, :, :].reshape((minute, 120, 6, 3))))
-            Y_test = np.vstack((Y_test, Y[i-minute:i].reshape((minute, 1))))
-    return (X_train, Y_train, X_test, Y_test)
+
 
 # This function is very slow
 def convert_to_angles(arr: np.ndarray):
     return get_half_skel_joint_angles(arr)
+
+def remove_empty_string(input: list) -> list:
+    #@param input: a list of lists
+    #@return: a list of lists with the empty string at the end of each sublist removed
+    #Also removes first element
+    for i in range(len(input)):
+        input[i] = input[i][1:-1]
+
+def append_value_multiple_times(arr: list, label: int, n_times: int):
+    for i in range(n_times):
+        arr.append(label)
+
+def map_activity_names(activity_name: str) -> str:
+    "Activity names are not consistent between the 2 datasets"
+    try:
+        mappings = {
+            "Tidying up": "Tidying up room",
+            "Changing bedsheets": "Changing bed sheets",
+            "Walking - dogs": "Walking dogs",
+            "Vacuuming - car": "Vacuuming (car)",
+            "Unloading dishwasher": "Unloading dish washer",
+            "Dusting - car": "Dusting (car)",
+            "Loading and unloading washing machine": "Loading & unloading washing machine",
+            "Walking": "Walking exercise"
+        }
+        return mappings[activity_name]
+    except KeyError:
+        # No need for mapping
+        return activity_name
+
+labels_csv = pd.read_csv("EmoPainAtHomeFull/labels.csv")
+
+def get_all_data(folderpath: str) -> (np.ndarray, np.ndarray):
+    labels = create_mapping(labels_csv)
+    print("Labels: ", labels)
+    bones_we_need = [
+      "ChestBottom",
+      "RightThigh",
+      "RightUpperArm",
+      "RightLowerLeg",
+      "RightForeArm",
+      "Hip"
+   ]
+    X = np.empty(shape=(0, 6, 3), dtype=object)
+    Y = []
+    for it in os.scandir(folderpath):
+        if it.is_dir():
+            try:
+                metadata = json.load(open(it.path + "/meta.json"))
+                # we need all 6
+                bones = metadata['bones']
+                if all(x in bones for x in bones_we_need):
+                    path_array = str(it.path).split("/")
+                    activity_name = path_array[1].split("_")[1]
+                    activity_name = map_activity_names(activity_name)
+                    try:
+                        activity_num = labels[activity_name]
+                    except KeyError:
+                        print("Unknown activity ", activity_name, " encountered, skipping…")
+                        continue
+                    # Figure out the number of rows in this session
+                    # Fortunately, it’s in the json
+                    columns = np.empty(shape=(metadata['frame_count'], 0), dtype=object)
+                    for bone in bones_we_need:
+                        reader = csv.reader(open(it.path + "/" + "Positions_" +  bone + ".csv"))
+                        next(reader)
+                        arr = list(reader)
+                        remove_empty_string(arr)
+                        # This typecasting is necessary
+                        float_arr = [[float(y) for y in x] for x in arr]
+                        arr = np.array(float_arr, dtype=object)
+                        # print("Shape of arr: ", arr.shape)
+                        # print("A bit of arr: ", arr[0:2])
+                        columns = np.hstack((columns, arr))
+                    columns = columns.reshape(-1, 6, 3)
+                    # print("Shape of columns: ", columns.shape)
+                    X = np.vstack((X, columns))
+                    append_value_multiple_times(arr=Y, label=activity_num,
+                                                n_times=columns.shape[0])
+
+            except JSONDecodeError:
+                print("Decode error encountered in ", it.path + "/meta.json", " skipping…")
+                continue
+            except FileNotFoundError:
+                print("File not found, likely that a sensor failed. Skipping…")
+                continue
+            except StopIteration:
+                print("Oopsie, ", it.path + "/" + "Positions_" +  bone + ".csv file must have been empty. Skipping…")
+                continue
+    Y = np.array(Y, dtype=object)
+    return (X, Y)

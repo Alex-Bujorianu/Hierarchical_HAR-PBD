@@ -4,8 +4,8 @@ from matplotlib.pyplot import figure
 import pandas as pd
 import json
 from sklearn.metrics import ConfusionMatrixDisplay
-Y_train = np.load("Data/Y_train.npy")
-Y_test = np.load("Data/Y_test.npy")
+Y_train = np.load("Data/Y_train_full.npy")
+Y_test = np.load("Data/Y_test_full.npy")
 
 print("Shape of Y_train: ", Y_train.shape)
 
@@ -30,7 +30,7 @@ plt.xticks(list(test_labels.keys()))
 fig = plt.gcf()
 fig.set_size_inches(12.0, 8)
 plt.show()
-labels_csv = pd.read_csv("EmoPainAtHome/rand_labels.csv")
+labels_csv = pd.read_csv("EmoPainAtHomeFull/labels.csv")
 def create_mapping(data: pd.DataFrame) -> dict:
     mappings = {}
     labels = data['Activity'].to_list()
@@ -43,7 +43,7 @@ mappings = create_mapping(labels_csv)
 print(mappings)
 print("Sorted labels ", sorted(list(mappings.values())))
 
-conf_matrix_cfcc = np.array(json.load(open("Results/Experiment_CFCC_repro_26l", "r"))['Confusion matrix'])
+conf_matrix_cfcc = np.array(json.load(open("Results/Experiment_CFCC_healthy", "r"))['Confusion matrix'])
 print("Length of conf matrix cfcc ", len(conf_matrix_cfcc[0]))
 conf_matrix_catloss = np.array(json.load(open("Results/Experiment_cat_loss_reproducible", "r"))['Confusion matrix'])
 disp = ConfusionMatrixDisplay(confusion_matrix=conf_matrix_cfcc, display_labels=np.array(list(range(1, 27))))

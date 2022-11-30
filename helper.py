@@ -45,7 +45,7 @@ def window(data: np.ndarray, window_time=3, sampling_rate=40, overlap=None):
     step = int(window_time*sampling_rate)
     if overlap==None:
         for i in range(step, len(data)+1, step):
-            to_return.append(data[i-step:i, :, :])
+            to_return.append(data[i-step:i])
         return np.array(to_return)
     else:
         for i in range(step, len(data)+1, step):
@@ -161,6 +161,7 @@ def map_activity_names(activity_name: str) -> str:
 labels_csv = pd.read_csv("EmoPainAtHomeFull/labels.csv")
 
 def get_all_data(folderpath: str) -> (np.ndarray, np.ndarray):
+    "This function returns windowed X and Y"
     labels = create_mapping(labels_csv)
     print("Labels: ", labels)
     bones_we_need = [
@@ -171,7 +172,7 @@ def get_all_data(folderpath: str) -> (np.ndarray, np.ndarray):
       "RightForeArm",
       "Hip"
    ]
-    X = np.empty(shape=(0, 6, 3), dtype=object)
+    X = np.empty(shape=(0, 120, 6, 3), dtype=object)
     Y = []
     for it in os.scandir(folderpath):
         if it.is_dir():
@@ -201,12 +202,13 @@ def get_all_data(folderpath: str) -> (np.ndarray, np.ndarray):
                         arr = np.array(float_arr, dtype=object)
                         columns = np.hstack((columns, arr))
                     columns = columns.reshape(-1, 6, 3)
+                    columns_windowed = window(columns, 3, 40, overlap=None)
                     # Temi thinks we should window each activity instance
                     # to prevent overlapping
-                    print("Shape of columns: ", columns.shape)
-                    X = np.vstack((X, columns))
-                    append_value_multiple_times(arr=Y, label=activity_num,
-                                                n_times=columns.shape[0])
+                    print("Shape of windowed columns: ", columns_windowed.shape)
+                    X = np.vstack((X, columns_windowed))
+                    append_value_multiple_times(Y, activity_num,
+                                n_times=columns_windowed.shape[0] * columns_windowed.shape[1])
 
             except JSONDecodeError:
                 print("Decode error encountered in ", it.path + "/meta.json", " skipping…")
@@ -218,4 +220,6 @@ def get_all_data(folderpath: str) -> (np.ndarray, np.ndarray):
                 print("Oopsie, ", it.path + "/" + "Positions_" +  bone + ".csv file must have been empty. Skipping…")
                 continue
     Y = np.array(Y, dtype=object)
+    Y = window(Y, 3, 40)
+    Y = convert_windowed_Y_to_shape(Y)
     return (X, Y)

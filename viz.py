@@ -8,6 +8,7 @@ Y_train = np.load("Data/Y_train_full.npy")
 Y_test = np.load("Data/Y_test_full.npy")
 
 print("Shape of Y_train: ", Y_train.shape)
+print("Shape of Y_test: ", Y_test.shape)
 
 def create_dictionary(arr: np.ndarray) -> dict:
     labels = {}

@@ -5,8 +5,7 @@
 import sys
 sys.path.append(r"C:\Users\uclicadmin\Desktop\Temi EnTimeMent\coding\Python\Classes\homestudy")
 sys.path.append(r"C:\Users\uclicadmin\Desktop\Temi Code\data")
-from emopainathomeDataClass import EmoPainAtHomedata
-from dataClass import *
+
 
 
 import numpy
@@ -107,8 +106,6 @@ class Plot():
 #with your own input data
 datafolderpath = r"C:\Users\uclicadmin\Desktop\Temi EnTimeMent\coding\Python\Data\EmoPain\home study"
 labelsfile = r"C:\Users\uclicadmin\Desktop\Temi EnTimeMent\coding\Python\Data\EmoPain\home study\labels.csv"
-dataobj = EmoPainAtHomedata(datafolderpath, labelsfile)
-datatable = dataobj.createdatatable()
 
 noofattrs = 2400*6*3
 single_instance = datatable[:, :noofattrs]

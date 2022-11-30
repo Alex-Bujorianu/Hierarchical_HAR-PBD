@@ -10,7 +10,7 @@ import os
 # Labels 9, 11 and 20 are basically the same thing
 # 21 and 22 (vacuuming and vacuuming car) are also similar
 # Painting shelves and painting wall?
-def merge_option_1(Y: np.ndarray) -> np.ndarray:
+def merge_option_1(Y: np.ndarray):
     washing_machine = set([9, 11, 20])
     for i in range(Y.shape[0]):
         label = Y[i][0]
@@ -45,7 +45,7 @@ def window(data: np.ndarray, window_time=3, sampling_rate=40, overlap=None):
     step = int(window_time*sampling_rate)
     if overlap==None:
         for i in range(step, len(data)+1, step):
-            to_return.append(data[i-step:i])
+            to_return.append(data[i-step:i, :, :])
         return np.array(to_return)
     else:
         for i in range(step, len(data)+1, step):
@@ -199,11 +199,11 @@ def get_all_data(folderpath: str) -> (np.ndarray, np.ndarray):
                         # This typecasting is necessary
                         float_arr = [[float(y) for y in x] for x in arr]
                         arr = np.array(float_arr, dtype=object)
-                        # print("Shape of arr: ", arr.shape)
-                        # print("A bit of arr: ", arr[0:2])
                         columns = np.hstack((columns, arr))
                     columns = columns.reshape(-1, 6, 3)
-                    # print("Shape of columns: ", columns.shape)
+                    # Temi thinks we should window each activity instance
+                    # to prevent overlapping
+                    print("Shape of columns: ", columns.shape)
                     X = np.vstack((X, columns))
                     append_value_multiple_times(arr=Y, label=activity_num,
                                                 n_times=columns.shape[0])

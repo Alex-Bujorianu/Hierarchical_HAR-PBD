@@ -101,6 +101,7 @@ def rebalance_classes(X: np.ndarray, Y: np.ndarray, split_ratio=0.8, overlap_rat
     data_dict = dict.fromkeys(labels)
     for label in labels:
         indices = np.where(Y==label)[0]
+        print("Indices: ", indices)
         data_dict[label] = {'X': X[indices], 'Y': Y[indices]}
     #print("Data dict: ", data_dict)
     X_train = np.empty(shape=(0, X.shape[1], X.shape[2],
@@ -151,7 +152,9 @@ def map_activity_names(activity_name: str) -> str:
             "Unloading dishwasher": "Unloading dish washer",
             "Dusting - car": "Dusting (car)",
             "Loading and unloading washing machine": "Loading & unloading washing machine",
-            "Walking": "Walking exercise"
+            "Walking": "Walking exercise",
+            "Loading dishwasher": "Loading dish washer",
+            "Washing Up": "Washing up"
         }
         return mappings[activity_name]
     except KeyError:
@@ -160,7 +163,7 @@ def map_activity_names(activity_name: str) -> str:
 
 labels_csv = pd.read_csv("EmoPainAtHomeFull/labels.csv")
 
-def get_all_data(folderpath: str) -> (np.ndarray, np.ndarray):
+def get_all_data(folderpath: str, time=3, sampling_rate=40) -> (np.ndarray, np.ndarray):
     "This function returns windowed X and Y"
     labels = create_mapping(labels_csv)
     print("Labels: ", labels)
@@ -172,7 +175,7 @@ def get_all_data(folderpath: str) -> (np.ndarray, np.ndarray):
       "RightForeArm",
       "Hip"
    ]
-    X = np.empty(shape=(0, 120, 6, 3), dtype=object)
+    X = np.empty(shape=(0, time*sampling_rate, 6, 3), dtype=object)
     Y = []
     for it in os.scandir(folderpath):
         if it.is_dir():
@@ -202,7 +205,7 @@ def get_all_data(folderpath: str) -> (np.ndarray, np.ndarray):
                         arr = np.array(float_arr, dtype=object)
                         columns = np.hstack((columns, arr))
                     columns = columns.reshape(-1, 6, 3)
-                    columns_windowed = window(columns, 3, 40, overlap=None)
+                    columns_windowed = window(columns, time, sampling_rate, overlap=None)
                     # Temi thinks we should window each activity instance
                     # to prevent overlapping
                     print("Shape of windowed columns: ", columns_windowed.shape)
@@ -220,6 +223,6 @@ def get_all_data(folderpath: str) -> (np.ndarray, np.ndarray):
                 print("Oopsie, ", it.path + "/" + "Positions_" +  bone + ".csv file must have been empty. Skipping…")
                 continue
     Y = np.array(Y, dtype=object)
-    Y = window(Y, 3, 40)
+    Y = window(Y, time, sampling_rate)
     Y = convert_windowed_Y_to_shape(Y)
     return (X, Y)

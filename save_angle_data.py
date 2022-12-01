@@ -10,11 +10,11 @@ from helper import window
 
 #print(MakeGraph())
 
-data = pd.read_csv("EmoPainAtHome/rand_labels.csv")
+data = pd.read_csv("EmoPain_old/rand_labels.csv")
 activity_labels = data['Activity'].unique()
 print("There are ", len(activity_labels), " labels")
 
-datafolderpath = os.getcwd() + "/" + "EmoPainAtHome"
+datafolderpath = os.getcwd() + "/" + "EmoPain_old"
 all_data = loadalldata(datafolderpath)
 
 print(all_data['63'])
@@ -30,10 +30,12 @@ def count_session_length(arg: dict) -> int:
             if key == rightjointids[j]:
                 return len(arg[key])
 
+activity_count = 0
 for key, dic in all_data.items():
     #print("key: ", key)
     one_session = np.empty((0, 6, 3))
     for session in dic:
+        activity_count += 1
         print("Session: ", session)
         length = count_session_length(dic[session])
         #print(length)
@@ -69,10 +71,11 @@ for key, dic in all_data.items():
             continue
             # If a sensor is missing, skip this session
 
+print("Activity count: ", activity_count)
 print("New data has ", len(new_data.keys()), " keys")
 #print("New data: ", new_data)
 # Activity Labels
-labelspath = os.getcwd() + "/" + "EmoPainAtHome/" + "rand_labels.csv"
+labelspath = os.getcwd() + "/" + "EmoPain_old/" + "rand_labels.csv"
 Y = loadalllabels(labelspath)
 #print("Y: ", Y)
 json.dump(Y, open("label_data.json", "w"))

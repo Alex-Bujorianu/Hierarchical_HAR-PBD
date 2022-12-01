@@ -4,11 +4,15 @@ from matplotlib.pyplot import figure
 import pandas as pd
 import json
 from sklearn.metrics import ConfusionMatrixDisplay
-Y_train = np.load("Data/Y_train_full.npy")
-Y_test = np.load("Data/Y_test_full.npy")
+Y_train = np.load("Data/Y_train.npy")
+Y_test = np.load("Data/Y_test.npy")
+Y_train_full = np.load("Data/Y_train_full.npy")
+Y_test_full = np.load("Data/Y_test_full.npy")
 
 print("Shape of Y_train: ", Y_train.shape)
 print("Shape of Y_test: ", Y_test.shape)
+print("Shape of Y_train full: ", Y_train_full.shape)
+print("Shape of Y_test full: ", Y_test_full.shape)
 
 def create_dictionary(arr: np.ndarray) -> dict:
     labels = {}

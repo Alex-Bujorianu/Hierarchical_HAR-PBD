@@ -31,6 +31,15 @@ def merge_option_2(Y: np.ndarray) -> np.ndarray:
         if (label == 21) or (label == 22):
             Y[i][0] = 21
 
+# For simplicity, call this function after choosing one of the
+# merge functions above
+def new_encoding(arr: np.ndarray):
+    conversion_dict = {1: 1, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7,
+                       9:8, 11:9, 14:10, 17:11, 18:12, 20:13,
+                       21:14, 22:15, 23:16, 24:17, 25:18, 26:19, 27:20}
+    for i in range(arr.shape[0]):
+        arr[i][0] = conversion_dict[arr[i][0]]
+
 def create_mapping(data: pd.DataFrame) -> dict:
     mappings = {}
     labels = data['Activity'].to_list()

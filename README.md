@@ -1,11 +1,19 @@
-# Hierarchical_HAR-PBD
+# Instructions
 
+The folder named EmoPain_old contains data about patients with chronic pain,
+and is organised in a different way from the other two folders, EmoPainAtHomeFull
+and EmoPainHealthy. The code to load them different: full_data_extraction
+should be used instead of the other 2 scripts (save_angle_data and 
+train_and_test). 
 
+The folder named EmoPainHealthy contains only data about healthy patients.
+It is organised in the same way as EmoPainAtHomeFull but is sampled at
+10Hz instead of 40Hz.
 
-## Code Description
-Each file contains 3 py files.
-- HierarchicalHAR_PBD.py is the code for model construction
-- main.py is the code for data pre-processing and main functions including model training. 
-- utils.py  is the code tool functions.
+The folder named Data contains the data, split, windowed and angled, as numpy arrays.
+Healthy and pain refer to EmoPainHealthy and EmoPainAtHomeFull respectively.
 
-Baselinde model is the Hierarchical HAR_PBD model only utilize MoCap data. Early Fusion model, Late Fusion model and Central Fusion model are different proposed multimodal fusion models using both MoCap and EMG. Central Fusion model with attention is build based on the Central Fusion model, while attention mechanism is implemented in the GCN networks. It achieves the best performance regarding to all the indicators including Accuracy, Macro.F1, PR-AUC and confusion matrix.
+The results folder contains the results of the different experiments,
+including the confusion matrix as wel as accuracy, F1 score etc.
+
+The Models folder contains saved Tensorflow models.

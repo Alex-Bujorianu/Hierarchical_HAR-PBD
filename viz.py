@@ -4,15 +4,8 @@ from matplotlib.pyplot import figure
 import pandas as pd
 import json
 from sklearn.metrics import ConfusionMatrixDisplay
-Y_train = np.load("Data/Y_train.npy")
-Y_test = np.load("Data/Y_test.npy")
-Y_train_full = np.load("Data/Y_train_full.npy")
-Y_test_full = np.load("Data/Y_test_full.npy")
-
-print("Shape of Y_train: ", Y_train.shape)
-print("Shape of Y_test: ", Y_test.shape)
-print("Shape of Y_train full: ", Y_train_full.shape)
-print("Shape of Y_test full: ", Y_test_full.shape)
+Y_train = np.load("Data/Y_train_pain.npy")
+Y_test = np.load("Data/Y_test_pain.npy")
 
 def create_dictionary(arr: np.ndarray) -> dict:
     labels = {}
@@ -48,7 +41,7 @@ mappings = create_mapping(labels_csv)
 print(mappings)
 print("Sorted labels ", sorted(list(mappings.values())))
 
-conf_matrix_cfcc = np.array(json.load(open("Results/Experiment_CFCC_healthy", "r"))['Confusion matrix'])
+conf_matrix_cfcc = np.array(json.load(open("Results/Experiment_cfcc_pain", "r"))['Confusion matrix'])
 print("Length of conf matrix cfcc ", len(conf_matrix_cfcc[0]))
 conf_matrix_catloss = np.array(json.load(open("Results/Experiment_cat_loss_actual", "r"))['Confusion matrix'])
 disp = ConfusionMatrixDisplay(confusion_matrix=conf_matrix_cfcc, display_labels=np.array(list(range(1, 27))))

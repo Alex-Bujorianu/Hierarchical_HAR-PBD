@@ -69,10 +69,10 @@ class HAR_model_wrapper():
 
 
 
-X_train = np.load("Data/X_train.npy")
-Y_train = np.load("Data/Y_train.npy")
-X_test = np.load("Data/X_test.npy")
-Y_test = np.load("Data/Y_test.npy")
+X_train = np.load("Data/X_train_pain.npy")
+Y_train = np.load("Data/Y_train_pain.npy")
+X_test = np.load("Data/X_test_pain.npy")
+Y_test = np.load("Data/Y_test_pain.npy")
 # Option for merging. Make sure to call this before -1
 merge_option_1(Y_train)
 merge_option_1(Y_test)
@@ -103,7 +103,7 @@ def add_missing_labels(class_counts: tuple) -> tuple:
     return res
 
 HARmodel = HAR_model_wrapper(adjacency_matrix=adjacency_matrix,
-                             timestep=120, node_num=4, feature_num=3)
+                             timestep=120, node_num=4, feature_num=3, num_class_HAR=27)
 
 
 def train_model(model: HAR_model_wrapper, X_train: np.ndarray, X_test: np.ndarray,
@@ -124,10 +124,10 @@ def train_model(model: HAR_model_wrapper, X_train: np.ndarray, X_test: np.ndarra
     # Beta = 0.9999 produces a really small loss
     model.model.compile(optimizer=Adam(learning_rate=5e-4, decay=1e-5),
                   loss={
-                        # 'HARout': 'categorical_crossentropy'
-                        'HARout': utils.focal_loss(weights = utils.class_balance_weights(0.30,
-                                     list(class_counts.values())),
-                                     gamma=5, num_class=model.num_classes)
+                        'HARout': 'categorical_crossentropy'
+                        # 'HARout': utils.focal_loss(weights = utils.class_balance_weights(0.30,
+                        #              list(class_counts.values())),
+                        #              gamma=5, num_class=model.num_classes)
                         },
                   loss_weights={'HARout': 1.},
                   metrics=['categorical_accuracy'])

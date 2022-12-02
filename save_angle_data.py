@@ -92,10 +92,17 @@ print("Length of activity labels ", len(activity_labels))
 # Window everything
 # This function is not slow
 def windowify():
+    total_frame_count = 0
+    total_window_count = 0
     for key,value in new_data.items():
         # print("Windowed array: ", window(value))
         print("Shape of windowed array: ", window(value).shape)
+        print("Shape of non-windowed array: ", value.shape)
+        total_frame_count += value.shape[0]
         new_data[key] = window(value)
+        total_window_count += window(value).shape[0]
+    print("Total frame count: ", total_frame_count)
+    print("Total number of windows: ", total_window_count)
 
 windowify()
 

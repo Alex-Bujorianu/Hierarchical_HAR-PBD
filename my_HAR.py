@@ -124,10 +124,10 @@ def train_model(model: HAR_model_wrapper, X_train: np.ndarray, X_test: np.ndarra
     # Beta = 0.9999 produces a really small loss
     model.model.compile(optimizer=Adam(learning_rate=5e-4, decay=1e-5),
                   loss={
-                        'HARout': 'categorical_crossentropy'
-                        # 'HARout': utils.focal_loss(weights = utils.class_balance_weights(0.30,
-                        #              list(class_counts.values())),
-                        #              gamma=5, num_class=model.num_classes)
+                        # 'HARout': 'categorical_crossentropy'
+                        'HARout': utils.focal_loss(weights = utils.class_balance_weights(0.30,
+                                     list(class_counts.values())),
+                                     gamma=5, num_class=model.num_classes)
                         },
                   loss_weights={'HARout': 1.},
                   metrics=['categorical_accuracy'])

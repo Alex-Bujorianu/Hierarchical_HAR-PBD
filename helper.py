@@ -101,7 +101,7 @@ def rebalance_classes(X: np.ndarray, Y: np.ndarray, split_ratio=0.8, overlap_rat
     data_dict = dict.fromkeys(labels)
     for label in labels:
         indices = np.where(Y==label)[0]
-        print("Indices: ", indices)
+        # print("Indices: ", indices)
         data_dict[label] = {'X': X[indices], 'Y': Y[indices]}
     #print("Data dict: ", data_dict)
     X_train = np.empty(shape=(0, X.shape[1], X.shape[2],
@@ -177,6 +177,7 @@ def get_all_data(folderpath: str, time=3, sampling_rate=40) -> (np.ndarray, np.n
    ]
     X = np.empty(shape=(0, time*sampling_rate, 6, 3), dtype=object)
     Y = []
+    frame_count = 0
     for it in os.scandir(folderpath):
         if it.is_dir():
             try:
@@ -205,10 +206,11 @@ def get_all_data(folderpath: str, time=3, sampling_rate=40) -> (np.ndarray, np.n
                         arr = np.array(float_arr, dtype=object)
                         columns = np.hstack((columns, arr))
                     columns = columns.reshape(-1, 6, 3)
+                    frame_count += columns.shape[0]
                     columns_windowed = window(columns, time, sampling_rate, overlap=None)
                     # Temi thinks we should window each activity instance
                     # to prevent overlapping
-                    print("Shape of windowed columns: ", columns_windowed.shape)
+                    #print("Shape of windowed columns: ", columns_windowed.shape)
                     X = np.vstack((X, columns_windowed))
                     append_value_multiple_times(Y, activity_num,
                                 n_times=columns_windowed.shape[0] * columns_windowed.shape[1])
@@ -225,4 +227,5 @@ def get_all_data(folderpath: str, time=3, sampling_rate=40) -> (np.ndarray, np.n
     Y = np.array(Y, dtype=object)
     Y = window(Y, time, sampling_rate)
     Y = convert_windowed_Y_to_shape(Y)
+    print("Total number of frames: ", frame_count)
     return (X, Y)

@@ -50,7 +50,7 @@ print("Sorted labels ", sorted(list(mappings.values())))
 
 conf_matrix_cfcc = np.array(json.load(open("Results/Experiment_CFCC_healthy", "r"))['Confusion matrix'])
 print("Length of conf matrix cfcc ", len(conf_matrix_cfcc[0]))
-conf_matrix_catloss = np.array(json.load(open("Results/Experiment_cat_loss_reproducible", "r"))['Confusion matrix'])
+conf_matrix_catloss = np.array(json.load(open("Results/Experiment_cat_loss_actual", "r"))['Confusion matrix'])
 disp = ConfusionMatrixDisplay(confusion_matrix=conf_matrix_cfcc, display_labels=np.array(list(range(1, 27))))
 fig, ax = plt.subplots(figsize=(16, 16))
 plt.rcParams.update({'font.size': 16})

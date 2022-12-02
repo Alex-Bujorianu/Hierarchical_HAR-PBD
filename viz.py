@@ -16,15 +16,15 @@ def create_dictionary(arr: np.ndarray) -> dict:
             labels[arr[i, 0]] = 1
     return labels
 
-train_labels = create_dictionary(Y_train)
-test_labels = create_dictionary(Y_test)
-plt.bar(*zip(*train_labels.items()))
+train_labels = np.unique(Y_train, return_counts=True)
+test_labels = np.unique(Y_test, return_counts=True)
+plt.bar(train_labels[0], train_labels[1])
 plt.title("Label distribution of training set")
-plt.xticks(list(train_labels.keys()))
+plt.xticks(list(train_labels[0]))
 plt.show()
-plt.bar(*zip(*test_labels.items()))
+plt.bar(test_labels[0], test_labels[1])
 plt.title("Label distribution of test set")
-plt.xticks(list(test_labels.keys()))
+plt.xticks(list(test_labels[0]))
 fig = plt.gcf()
 fig.set_size_inches(12.0, 8)
 plt.show()

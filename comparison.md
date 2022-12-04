@@ -38,3 +38,6 @@ Option 2:
 4. Recall  0.5003267973856209
 
 Option 2 is a lot worse than option 1.
+
+## Increasing time window
+Increasing the time window gives the model more data to recognise an activity, but, it effectively reduces the number of training instances. I think the learning rate should be larger to account for that.

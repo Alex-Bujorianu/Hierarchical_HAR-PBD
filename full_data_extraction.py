@@ -17,7 +17,7 @@ X = np.arange(1, 13)
 print("Final result: ", window(X, 4, 1, 0.5))
 X = np.arange(1, 17)
 print("Another test: ", window(X, 4, 1, 0.5))
-X, Y = get_all_data("EmoPainAtHomeFull", time=3, sampling_rate=40)
+X, Y = get_all_data("EmoPainAtHomeFull", time=12, sampling_rate=40)
 # Healthy participants were sampled at 10Hz
 # Just train on sick participants first
 # X_healthy, Y_healthy = get_all_data("EmoPainHealthy")
@@ -28,8 +28,6 @@ print("Shape of Y: ", Y.shape)
 # Performance is bad with 50% overlap
 X_train, Y_train, X_test, Y_test = rebalance_classes(X, Y,
                         split_ratio=0.8, overlap_ratio=0)
-print("Y test: ", Y_test)
-print("X test: ", X_test)
 # Sanity check, does the distribution between train/test look reasonable?
 def create_dictionary(arr: np.ndarray) -> dict:
     labels = {}
@@ -64,13 +62,19 @@ X_train = convert_to_angles(X_train)
 X_test = convert_to_angles(X_test)
 
 # Jitter and crop training data
-X_jitter = gauss_noise(X_train, 5)
+X_jitter, Y_jitter = gauss_noise(X_train, 5, labels=[4, 6, 7, 18, 22], Y=Y_train)
 X_cropped = cropping(X_train, 0.1)
 X_train = np.concatenate((X_train, X_jitter, X_cropped), axis=0)
 print(X_train.shape)
-# Triplicate labels
-Y_train = np.concatenate((Y_train, Y_train, Y_train), axis=0)
+Y_train = np.concatenate((Y_train, Y_jitter, Y_train), axis=0)
 print(Y_train.shape)
+train_labels = create_dictionary(Y_train)
+plt.bar(*zip(*train_labels.items()))
+plt.title("Label distribution of training set after augmentation")
+plt.xticks(list(train_labels.keys()))
+fig = plt.gcf()
+fig.set_size_inches(12.0, 8)
+plt.show()
 
 # Angles can be negative after jittering
 # so add 360 or make it 0, or keep it negative
@@ -90,7 +94,7 @@ def make_positive(input_arr: np.ndarray) -> np.ndarray:
 make_positive(X_train)
 
 # Save
-np.save(arr=X_train, file="Data/X_train_full")
-np.save(arr=Y_train, file="Data/Y_train_full")
-np.save(arr=X_test, file="Data/X_test_full")
-np.save(arr=Y_test, file="Data/Y_test_full")
+np.save(arr=X_train, file="Data/X_train_pain_12s_resampled")
+np.save(arr=Y_train, file="Data/Y_train_pain_12s_resampled")
+np.save(arr=X_test, file="Data/X_test_pain_12s_resampled")
+np.save(arr=Y_test, file="Data/Y_test_pain_12s_resampled")

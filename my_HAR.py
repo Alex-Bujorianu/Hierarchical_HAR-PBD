@@ -174,7 +174,7 @@ results = {"F1 score": f1_score(Y_test, predictions, average='weighted'),
            "Accuracy": accuracy_score(Y_test, predictions),
            "Precision": precision_score(Y_test, predictions, average='weighted'),
            "Recall": recall_score(Y_test, predictions, average='weighted'),
-           "Confusion matrix": confusion_matrix(Y_test, predictions)}
+           "Confusion matrix": confusion_matrix(Y_test, predictions, labels=list(range(1, 28)))}
 print("F1 score ", f1_score(Y_test, predictions, average='weighted'))
 print("Accuracy ", accuracy_score(Y_test, predictions))
 print("Precision ", precision_score(Y_test, predictions, average='weighted'))

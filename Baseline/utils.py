@@ -75,12 +75,24 @@ def segmentation(mat, overlap_ratio, window_len):
     return x_segment, y_segment
 
 #jittering(Gaussian Noise)
-def gauss_noise(data, dev):
-    # data(N*180*66)
-    #dev is deviation
-    noise = np.random.normal(0, dev, data.shape)
-    data_jitternig = data + noise
-    return data_jitternig
+def gauss_noise(data, dev, labels=None, Y=None):
+    "Pass the list of labels you want to selectively augment along with Y"
+    # dev is deviation
+    if labels is not None:
+        assert Y is not None
+        new_data = np.empty(shape=(0, data.shape[1], data.shape[2], data.shape[3]))
+        new_Y = np.empty(shape=(0, 1))
+        for label in labels:
+            indices = np.where(Y==label)[0]
+            new_data = np.concatenate((new_data, data[indices, :, :, :]), axis=0)
+            new_Y = np.concatenate((new_Y, Y[indices, :]), axis=0)
+        noise = np.random.normal(0, dev, new_data.shape)
+        jittered_data = new_data + noise
+        return (jittered_data, new_Y)
+    else:
+        noise = np.random.normal(0, dev, data.shape)
+        data_jitternig = data + noise
+        return data_jitternig
 
 def calculate_degree_matrix(adjacency_matrix: np.ndarray) -> np.ndarray:
     assert  adjacency_matrix.shape[0] == adjacency_matrix.shape[1]

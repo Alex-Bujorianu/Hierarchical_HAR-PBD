@@ -7,6 +7,17 @@ import json
 from json import JSONDecodeError
 import os
 
+def max_scale(arr: np.ndarray) -> np.ndarray:
+    #@param arr: a 2D array of shape (windows, window_length)
+    # Apply this to each node/angle
+    new_arr = np.empty(shape=arr.shape)
+    maximum = np.max(arr)
+    for i in range(arr.shape[0]):
+        for j in range(arr.shape[1]):
+            new_arr[i, j] = arr[i, j] / maximum
+    return new_arr
+
+
 # Labels 9, 11 and 20 are basically the same thing
 # 21 and 22 (vacuuming and vacuuming car) are also similar
 # Painting shelves and painting wall?

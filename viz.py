@@ -4,6 +4,7 @@ from matplotlib.pyplot import figure
 import pandas as pd
 import json
 from sklearn.metrics import ConfusionMatrixDisplay
+from helper import max_scale
 Y_train = np.load("Data/Y_train_pain.npy")
 Y_test = np.load("Data/Y_test_pain.npy")
 
@@ -74,12 +75,24 @@ plt.rcParams.update({'font.size': 16})
 disp.plot(ax=ax)
 plt.show()
 
-# Plot some of the angles
+def sample_every_n(arr, n=10, m=10):
+    to_return = []
+    for i in range(0, arr.shape[0], n):
+        for j in range(0, arr.shape[1], m):
+            to_return.append(arr[i, j])
+    return to_return
+
+# Plot the angles, do they have the same scale?
 X_train = np.load("Data/X_train_pain.npy")
-angle_1 = X_train[:, 0:10, 0, 0]
-angle_2 = X_train[:, 0:10, 1, 0]
-print("Min and max of angle1 ", np.min(angle_1), np.max(angle_1))
-print("Min and max of angle2 ", np.min(angle_2), np.max(angle_2))
-plt.plot(angle_1)
-plt.plot(angle_2)
-plt.show()
+for i in range(X_train.shape[2]):
+    for j in range(X_train.shape[3]):
+        X_train[:, :, i, j] = max_scale(X_train[:, :, i, j])
+for i in range(X_train.shape[2]):
+    for j in range(X_train.shape[3]):
+        plt.plot(sample_every_n(X_train[:, :, i, j], n=100), label='Sensor ' + str(i+1) +
+                                            ' dimension ' + str(j+1))
+    plt.legend(loc='right')
+    plt.show()
+
+# As far as I can tell, they all have the same scale
+# But no substitute for experimentation

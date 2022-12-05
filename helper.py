@@ -161,10 +161,10 @@ def map_activity_names(activity_name: str) -> str:
         # No need for mapping
         return activity_name
 
-labels_csv = pd.read_csv("EmoPainAtHomeFull/labels.csv")
 
 def get_all_data(folderpath: str, time=3, sampling_rate=40) -> (np.ndarray, np.ndarray):
     "This function returns windowed X and Y"
+    labels_csv = pd.read_csv("EmoPainAtHomeFull/labels.csv")
     labels = create_mapping(labels_csv)
     print("Labels: ", labels)
     bones_we_need = [

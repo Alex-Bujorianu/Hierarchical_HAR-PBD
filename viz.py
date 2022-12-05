@@ -48,9 +48,20 @@ print("Sorted labels ", sorted(list(mappings.values())))
 # fig, ax = plt.subplots(figsize=(16, 16))
 # plt.rcParams.update({'font.size': 16})
 # disp.plot(ax=ax)
-conf_matrix_catloss = np.array(json.load(open("Results/Experiment_cat_loss_pain", "r"))['Confusion matrix'])
-disp = ConfusionMatrixDisplay(confusion_matrix=conf_matrix_catloss, display_labels=np.array(list(range(1, 28))))
+conversion_dict = {1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7,
+                   9: 8, 11: 8, 14: 9, 17: 10, 18: 11, 20: 8,
+                   21: 12, 22: 13, 23: 14, 24: 15, 25: 16, 26: 17, 27: 18}
+conversion_dict_reversed = {v:k for (k,v) in conversion_dict.items()}
+labels_to_activities = {conversion_dict_reversed[i]:'' for i in range(1, 19)}
+for key, value in mappings.items():
+    if value in conversion_dict_reversed:
+        conversion_dict_reversed[value] = key
+print(conversion_dict_reversed)
+conf_matrix= np.array(json.load(open("Results/Experiment_cfcc_pain", "r"))['Confusion matrix'])
+print("Length of conf_matrix", len(conf_matrix))
+disp = ConfusionMatrixDisplay(confusion_matrix=conf_matrix, display_labels=np.array(list(range(1, 19))))
 fig, ax = plt.subplots(figsize=(16, 16))
+plt.legend()
 plt.rcParams.update({'font.size': 16})
 disp.plot(ax=ax)
 plt.show()

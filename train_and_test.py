@@ -309,7 +309,7 @@ def make_positive(input_arr: np.ndarray) -> np.ndarray:
 make_positive(X_train)
 
 # Save
-np.save(arr=X_train, file="Data/X_train")
-np.save(arr=Y_train, file="Data/Y_train")
-np.save(arr=X_test, file="Data/X_test")
-np.save(arr=Y_test, file="Data/Y_test")
+np.save(arr=X_train, file="Data/X_train_old_organisation")
+np.save(arr=Y_train, file="Data/Y_train_old_organisation")
+np.save(arr=X_test, file="Data/X_test_old_organisation")
+np.save(arr=Y_test, file="Data/Y_test_old_organisation")

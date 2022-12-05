@@ -48,15 +48,23 @@ print("Sorted labels ", sorted(list(mappings.values())))
 # fig, ax = plt.subplots(figsize=(16, 16))
 # plt.rcParams.update({'font.size': 16})
 # disp.plot(ax=ax)
+def find_key_from_value(to_search: dict, searchkey):
+    for key, value in to_search.items():
+        if value==searchkey:
+            return key
 conversion_dict = {1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7,
                    9: 8, 11: 8, 14: 9, 17: 10, 18: 11, 20: 8,
                    21: 12, 22: 13, 23: 14, 24: 15, 25: 16, 26: 17, 27: 18}
-conversion_dict_reversed = {v:k for (k,v) in conversion_dict.items()}
-labels_to_activities = {conversion_dict_reversed[i]:'' for i in range(1, 19)}
-for key, value in mappings.items():
-    if value in conversion_dict_reversed:
-        conversion_dict_reversed[value] = key
+conversion_dict_reversed = {k:[] for k in conversion_dict.values()}
+for key, value in conversion_dict.items():
+    conversion_dict_reversed[value].append(key)
+
 print(conversion_dict_reversed)
+labels_dict = {}
+for key, value in conversion_dict_reversed.items():
+    for keys in value:
+        labels_dict[key] = find_key_from_value(mappings, keys)
+print(labels_dict)
 conf_matrix= np.array(json.load(open("Results/Experiment_cfcc_pain", "r"))['Confusion matrix'])
 print("Length of conf_matrix", len(conf_matrix))
 disp = ConfusionMatrixDisplay(confusion_matrix=conf_matrix, display_labels=np.array(list(range(1, 19))))

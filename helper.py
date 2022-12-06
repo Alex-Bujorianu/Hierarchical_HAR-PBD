@@ -117,9 +117,15 @@ def rebalance_classes(X: np.ndarray, Y: np.ndarray, split_ratio=0.8, overlap_rat
     data_dict = dict.fromkeys(labels)
     for label in labels:
         indices = np.where(Y==label)[0]
-        # print("Indices: ", indices)
         data_dict[label] = {'X': X[indices], 'Y': Y[indices]}
-    #print("Data dict: ", data_dict)
+    # An activity in the training set may be done by 1 patient
+    # whereas the same activity in the test might be done by a different patient
+    # so we have to sample from different ‘zones’ in the array, by shuffling
+    # But, the order in X must correspond to the order in Y
+    # and the order of the frames within the windows must remain unchanged
+    for key, value in data_dict.items():
+        my_shuffle(value['X'])
+        my_shuffle(value['Y'])
     X_train = np.empty(shape=(0, X.shape[1], X.shape[2],
                                   X.shape[3]))
     X_test = np.empty(shape=(0, X.shape[1], X.shape[2],
@@ -137,16 +143,6 @@ def rebalance_classes(X: np.ndarray, Y: np.ndarray, split_ratio=0.8, overlap_rat
         Y_train = np.vstack((Y_train, value['Y'][0:int(split_ratio * value['Y'].shape[0])]))
         Y_test = np.vstack((Y_test,
                             value['Y'][int(split_ratio * value['Y'].shape[0]):]))
-        #print("Y_test in for loop", Y_test)
-    # An activity in the training set may be done by 1 patient
-    # whereas the same activity in the test might be done by a different patient
-    # so we have to sample from different ‘zones’ in the array, by shuffling
-    # But, the order in X must correspond to the order in Y
-    # and the order of the frames within the windows must remain unchanged
-    my_shuffle(X_train)
-    my_shuffle(X_test)
-    my_shuffle(Y_train)
-    my_shuffle(Y_test)
     return (X_train, Y_train, X_test, Y_test)
 
 

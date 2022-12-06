@@ -62,25 +62,25 @@ X_train = convert_to_angles(X_train)
 X_test = convert_to_angles(X_test)
 
 # Jitter and crop training data
-X_jitter, Y_jitter = gauss_noise(X_train, 5, labels=[4, 6, 7, 18, 22], Y=Y_train)
-list_of_indices = []
-for label in [4, 6, 7, 18, 22]:
-    indices = np.where(Y_train==label)[0]
-    for index in indices:
-        list_of_indices.append(index)
+X_jitter = gauss_noise(X_train, 5)
+# list_of_indices = []
+# for label in [4, 6, 7, 18, 22]:
+#     indices = np.where(Y_train==label)[0]
+#     for index in indices:
+#         list_of_indices.append(index)
 
-X_cropped = cropping(X_train[list_of_indices, :, :, :], 0.1)
+X_cropped = cropping(X_train, 0.1)
 X_train = np.concatenate((X_train, X_jitter, X_cropped), axis=0)
 print(X_train.shape)
-Y_train = np.concatenate((Y_train, Y_jitter, Y_jitter), axis=0)
+Y_train = np.concatenate((Y_train, Y_train, Y_train), axis=0)
 print(Y_train.shape)
-train_labels = create_dictionary(Y_train)
-plt.bar(*zip(*train_labels.items()))
-plt.title("Label distribution of training set after augmentation")
-plt.xticks(list(train_labels.keys()))
-fig = plt.gcf()
-fig.set_size_inches(12.0, 8)
-plt.show()
+# train_labels = create_dictionary(Y_train)
+# plt.bar(*zip(*train_labels.items()))
+# plt.title("Label distribution of training set after augmentation")
+# plt.xticks(list(train_labels.keys()))
+# fig = plt.gcf()
+# fig.set_size_inches(12.0, 8)
+# plt.show()
 
 # Angles can be negative after jittering
 # so add 360 or make it 0, or keep it negative

@@ -99,6 +99,11 @@ def convert_windowed_Y_to_shape(arr: np.ndarray) -> np.ndarray:
         new_arr[i] = arr[i, 0]
     return new_arr
 
+def my_shuffle(arr, seed=123):
+    "Shuffles in place using provided random seed"
+    generator = np.random.default_rng(seed)
+    generator.shuffle(arr, axis=0)
+
 # Note: random sampling is NOT necessarily the best approach here
 # We want classes in the train set to be represented in the test set
 # Sampling at random introduces large differences in the distribution of the two sets
@@ -123,7 +128,6 @@ def rebalance_classes(X: np.ndarray, Y: np.ndarray, split_ratio=0.8, overlap_rat
     Y_test = np.empty(shape=(0, Y.shape[1]))
     if not (20/(1-overlap_ratio)).is_integer():
         raise ValueError("Overlap ratio is not compatible with window size")
-    minute = int(20 / (1-overlap_ratio))
     for key, value in data_dict.items():
         X_train = np.vstack((X_train,
                              value['X'][0:int(split_ratio*value['X'].shape[0])]))
@@ -134,6 +138,15 @@ def rebalance_classes(X: np.ndarray, Y: np.ndarray, split_ratio=0.8, overlap_rat
         Y_test = np.vstack((Y_test,
                             value['Y'][int(split_ratio * value['Y'].shape[0]):]))
         #print("Y_test in for loop", Y_test)
+    # An activity in the training set may be done by 1 patient
+    # whereas the same activity in the test might be done by a different patient
+    # so we have to sample from different ‘zones’ in the array, by shuffling
+    # But, the order in X must correspond to the order in Y
+    # and the order of the frames within the windows must remain unchanged
+    my_shuffle(X_train)
+    my_shuffle(X_test)
+    my_shuffle(Y_train)
+    my_shuffle(Y_test)
     return (X_train, Y_train, X_test, Y_test)
 
 

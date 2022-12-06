@@ -100,7 +100,7 @@ def make_positive(input_arr: np.ndarray) -> np.ndarray:
 make_positive(X_train)
 
 # Save
-np.save(arr=X_train, file="Data/X_train_pain_3s_resampled")
-np.save(arr=Y_train, file="Data/Y_train_pain_3s_resampled")
-np.save(arr=X_test, file="Data/X_test_pain_3s_resampled")
-np.save(arr=Y_test, file="Data/Y_test_pain_3s_resampled")
+np.save(arr=X_train, file="Data/X_train_pain")
+np.save(arr=Y_train, file="Data/Y_train_pain")
+np.save(arr=X_test, file="Data/X_test_pain")
+np.save(arr=Y_test, file="Data/Y_test_pain")

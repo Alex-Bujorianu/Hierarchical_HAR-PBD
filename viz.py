@@ -87,7 +87,7 @@ plt.rcParams.update({'font.size': 16})
 disp.plot(ax=ax)
 plt.show()
 # To help figure out this key
-original_labels = [1, 2, 3, 8, 12, 14, 15, 10]
+original_labels = to_predict = [1, 2, 3, 8, 12, 14, 15, 9]
 for i in range(1, 9):
     print("Label nr ", i, "corresponds to ", labels_dict[original_labels[i-1]])
 

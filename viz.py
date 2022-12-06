@@ -5,8 +5,20 @@ import pandas as pd
 import json
 from sklearn.metrics import ConfusionMatrixDisplay
 from helper import max_scale
-Y_train = np.load("Data/Y_train_pain.npy")
-Y_test = np.load("Data/Y_test_pain.npy")
+Y_train = np.load("Data/Y_train_pain_3s_resampled.npy")
+Y_test = np.load("Data/Y_test_pain_3s_resampled.npy")
+def new_encoding(arr: np.ndarray):
+    conversion_dict = {1: 1, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7,
+                       9:8, 11:8, 14:9, 17:10, 18:11, 20:8,
+                       21:12, 22:13, 23:14, 24:15, 25:16, 26:17, 27:18}
+    for i in range(arr.shape[0]):
+        arr[i][0] = conversion_dict[arr[i][0]]
+print("Classes before new encoding ", np.unique(Y_train))
+new_encoding(Y_train)
+new_encoding(Y_test)
+print("Classes after new encoding ", np.unique(Y_train))
+print("Shape of Y test ", Y_test.shape)
+
 
 def create_dictionary(arr: np.ndarray) -> dict:
     labels = {}

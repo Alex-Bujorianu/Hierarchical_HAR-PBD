@@ -5,8 +5,8 @@ import pandas as pd
 import json
 from sklearn.metrics import ConfusionMatrixDisplay
 from helper import max_scale
-Y_train = np.load("Data/Y_train_pain_3s_resampled.npy")
-Y_test = np.load("Data/Y_test_pain_3s_resampled.npy")
+Y_train = np.load("Data/Y_train_pain.npy")
+Y_test = np.load("Data/Y_test_pain.npy")
 def new_encoding(arr: np.ndarray):
     conversion_dict = {1: 1, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7,
                        9:8, 11:8, 14:9, 17:10, 18:11, 20:8,
@@ -78,14 +78,18 @@ for key, value in conversion_dict_reversed.items():
     for keys in value:
         labels_dict[key] = find_key_from_value(mappings, keys)
 print(labels_dict)
-conf_matrix= np.array(json.load(open("Results/Experiment_cfcc_pain", "r"))['Confusion matrix'])
+conf_matrix= np.array(json.load(open("Results/Experiment_3s_cfcc_shuffled_full-augmentation", "r"))['Confusion matrix'])
 print("Length of conf_matrix", len(conf_matrix))
-disp = ConfusionMatrixDisplay(confusion_matrix=conf_matrix, display_labels=np.array(list(range(1, 19))))
+disp = ConfusionMatrixDisplay(confusion_matrix=conf_matrix, display_labels=np.array(list(range(1, 9))))
 fig, ax = plt.subplots(figsize=(16, 16))
 plt.legend()
 plt.rcParams.update({'font.size': 16})
 disp.plot(ax=ax)
 plt.show()
+# To help figure out this key
+original_labels = [1, 2, 3, 8, 12, 14, 15, 10]
+for i in range(1, 9):
+    print("Label nr ", i, "corresponds to ", labels_dict[original_labels[i-1]])
 
 def sample_every_n(arr, n=10, m=10):
     to_return = []

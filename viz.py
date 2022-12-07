@@ -88,8 +88,8 @@ disp.plot(ax=ax)
 plt.show()
 # To help figure out this key
 original_labels = to_predict = [1, 2, 3, 8, 12, 14, 15, 9]
-for i in range(1, 9):
-    print("Label nr ", i, "corresponds to ", labels_dict[original_labels[i-1]])
+for i in range(0, 8):
+    print("Label nr ", i, "corresponds to ", labels_dict[original_labels[i]])
 
 # Let’s create a readable bar chart
 original_label_counts = {}

@@ -91,6 +91,15 @@ original_labels = to_predict = [1, 2, 3, 8, 12, 14, 15, 9]
 for i in range(1, 9):
     print("Label nr ", i, "corresponds to ", labels_dict[original_labels[i-1]])
 
+# Let’s create a readable bar chart
+original_label_counts = {}
+label_counts = create_dictionary(Y_train)
+for i in range(len(original_labels)):
+    original_label_counts[i+1] = label_counts[original_labels[i]]
+
+plt.bar(*zip(*original_label_counts.items()))
+plt.xticks(list(range(1, 9)))
+plt.show()
 def sample_every_n(arr, n=10, m=10):
     to_return = []
     for i in range(0, arr.shape[0], n):

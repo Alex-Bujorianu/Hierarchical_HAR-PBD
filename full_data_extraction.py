@@ -6,7 +6,8 @@ import numpy as np
 import csv
 import pandas as pd
 from helper import create_mapping, window, convert_windowed_array_to_shape, \
-    rebalance_classes, convert_windowed_Y_to_shape, convert_to_angles, get_all_data
+    rebalance_classes, convert_windowed_Y_to_shape, convert_to_angles, \
+    get_all_data, downsample
 import matplotlib.pyplot as plt
 
 labels_csv = pd.read_csv("EmoPainAtHomeFull/labels.csv")
@@ -17,7 +18,12 @@ X = np.arange(1, 13)
 print("Final result: ", window(X, 4, 1, 0.5))
 X = np.arange(1, 17)
 print("Another test: ", window(X, 4, 1, 0.5))
-X, Y = get_all_data("EmoPainAtHomeFull", time=12, sampling_rate=40)
+X, Y = get_all_data("EmoPainAtHomeFull", time=3, sampling_rate=40)
+n_windows = X.shape[0]
+X = downsample(X)
+assert X.shape[1] == 30
+assert X.shape[0] == n_windows
+assert X.shape[2] == 6
 # Healthy participants were sampled at 10Hz
 # Just train on sick participants first
 # X_healthy, Y_healthy = get_all_data("EmoPainHealthy")
@@ -100,7 +106,7 @@ def make_positive(input_arr: np.ndarray) -> np.ndarray:
 make_positive(X_train)
 
 # Save
-np.save(arr=X_train, file="Data/X_train_pain_12s")
-np.save(arr=Y_train, file="Data/Y_train_pain_12s")
-np.save(arr=X_test, file="Data/X_test_pain_12s")
-np.save(arr=Y_test, file="Data/Y_test_pain_12s")
+np.save(arr=X_train, file="Data/X_train_pain_3s_10hz")
+np.save(arr=Y_train, file="Data/Y_train_pain_3s_10hz")
+np.save(arr=X_test, file="Data/X_test_pain_3s_10hz")
+np.save(arr=Y_test, file="Data/Y_test_pain_3s_10hz")

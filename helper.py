@@ -6,6 +6,29 @@ from angleforAlex import get_half_skel_joint_angles
 import json
 from json import JSONDecodeError
 import os
+from statistics import mean
+
+def rolling_mean(arr, ratio) -> np.ndarray:
+    "Arr should be 1D array-like"
+    assert type(ratio) == int
+    to_return = []
+    for i in range(ratio, len(arr)+1, ratio):
+        to_return.append(mean(arr[i-ratio:i]))
+    return np.array(to_return, dtype=float)
+
+def downsample(X, input_freq=40, output_freq=10) -> np.ndarray:
+    if not (input_freq/output_freq).is_integer():
+        raise TypeError("This function only works when the downsampling ratio is an integer")
+    ratio = int(input_freq/output_freq)
+    X_downsampled = np.empty(shape=(X.shape[0], int(X.shape[1]/ratio), X.shape[2], X.shape[3]))
+    for i in range(X.shape[0]):
+        for j in range(X.shape[2]):
+            for z in range(X.shape[3]):
+                X_downsampled[i, :, j, z] = rolling_mean(X[i, :, j, z],
+                                                  ratio=ratio)
+
+    return X_downsampled
+
 
 def max_scale(arr: np.ndarray) -> np.ndarray:
     #@param arr: a 2D array of shape (windows, window_length)

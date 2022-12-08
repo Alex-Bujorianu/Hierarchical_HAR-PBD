@@ -80,7 +80,7 @@ for key, value in conversion_dict_reversed.items():
 print(labels_dict)
 conf_matrix= np.array(json.load(open("Results/Experiment_3s_cfcc_shuffled_full-augmentation", "r"))['Confusion matrix'])
 print("Length of conf_matrix", len(conf_matrix))
-disp = ConfusionMatrixDisplay(confusion_matrix=conf_matrix, display_labels=np.array(list(range(1, 9))))
+disp = ConfusionMatrixDisplay(confusion_matrix=conf_matrix, display_labels=np.array(list(range(0, 8))))
 fig, ax = plt.subplots(figsize=(16, 16))
 plt.legend()
 plt.rcParams.update({'font.size': 16})
@@ -95,10 +95,10 @@ for i in range(0, 8):
 original_label_counts = {}
 label_counts = create_dictionary(Y_train)
 for i in range(len(original_labels)):
-    original_label_counts[i+1] = label_counts[original_labels[i]]
+    original_label_counts[i] = label_counts[original_labels[i]]
 
 plt.bar(*zip(*original_label_counts.items()))
-plt.xticks(list(range(1, 9)))
+plt.xticks(list(range(0, 8)))
 plt.show()
 def sample_every_n(arr, n=10, m=10):
     to_return = []

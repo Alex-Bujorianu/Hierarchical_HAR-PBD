@@ -17,7 +17,7 @@ X = np.arange(1, 13)
 print("Final result: ", window(X, 4, 1, 0.5))
 X = np.arange(1, 17)
 print("Another test: ", window(X, 4, 1, 0.5))
-X, Y = get_all_data("EmoPainAtHomeFull", time=3, sampling_rate=40)
+X, Y = get_all_data("EmoPainAtHomeFull", time=12, sampling_rate=40)
 # Healthy participants were sampled at 10Hz
 # Just train on sick participants first
 # X_healthy, Y_healthy = get_all_data("EmoPainHealthy")
@@ -27,7 +27,7 @@ print("Shape of X: ", X.shape)
 print("Shape of Y: ", Y.shape)
 # Performance is bad with 50% overlap
 X_train, Y_train, X_test, Y_test = rebalance_classes(X, Y,
-                        split_ratio=0.8, overlap_ratio=0)
+                        split_ratio=0.6, overlap_ratio=0)
 # Sanity check, does the distribution between train/test look reasonable?
 def create_dictionary(arr: np.ndarray) -> dict:
     labels = {}
@@ -100,7 +100,7 @@ def make_positive(input_arr: np.ndarray) -> np.ndarray:
 make_positive(X_train)
 
 # Save
-np.save(arr=X_train, file="Data/X_train_pain")
-np.save(arr=Y_train, file="Data/Y_train_pain")
-np.save(arr=X_test, file="Data/X_test_pain")
-np.save(arr=Y_test, file="Data/Y_test_pain")
+np.save(arr=X_train, file="Data/X_train_pain_12s")
+np.save(arr=Y_train, file="Data/Y_train_pain_12s")
+np.save(arr=X_test, file="Data/X_test_pain_12s")
+np.save(arr=Y_test, file="Data/Y_test_pain_12s")

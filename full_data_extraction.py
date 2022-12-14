@@ -18,7 +18,7 @@ X = np.arange(1, 13)
 print("Final result: ", window(X, 4, 1, 0.5))
 X = np.arange(1, 17)
 print("Another test: ", window(X, 4, 1, 0.5))
-time = 3
+time = 12
 X, Y = get_all_data("EmoPainAtHomeFull", time=time, sampling_rate=40)
 n_windows = X.shape[0]
 X = downsample(X)
@@ -106,7 +106,7 @@ def make_positive(input_arr: np.ndarray) -> np.ndarray:
 make_positive(X_train)
 
 # Save
-np.save(arr=X_train, file="Data/X_train_full_3s")
-np.save(arr=Y_train, file="Data/Y_train_full_3s")
-np.save(arr=X_test, file="Data/X_test_full_3s")
-np.save(arr=Y_test, file="Data/Y_test_full_3s")
+np.save(arr=X_train, file="Data/X_train_full_12s")
+np.save(arr=Y_train, file="Data/Y_train_full_12s")
+np.save(arr=X_test, file="Data/X_test_full_12s")
+np.save(arr=Y_test, file="Data/Y_test_full_12s")

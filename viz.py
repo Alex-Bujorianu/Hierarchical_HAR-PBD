@@ -5,20 +5,20 @@ import pandas as pd
 import json
 from sklearn.metrics import ConfusionMatrixDisplay
 from helper import max_scale
-Y_train = np.load("Data/Y_train_pain.npy")
-Y_test = np.load("Data/Y_test_pain.npy")
+Y_train_noaug = np.load("Data/Y_train_pain.npy")
+Y_train_sel_aug = np.load("Data/Y_train_pain_3s_resampled.npy")
 def new_encoding(arr: np.ndarray):
     conversion_dict = {1: 1, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7,
-                       9:8, 11:8, 14:9, 17:10, 18:11, 20:8,
+                       9:8, 10:11, 11:8, 14:9, 17:10, 18:11, 20:8,
                        21:12, 22:13, 23:14, 24:15, 25:16, 26:17, 27:18}
     for i in range(arr.shape[0]):
         arr[i][0] = conversion_dict[arr[i][0]]
-print("Classes before new encoding ", np.unique(Y_train))
-new_encoding(Y_train)
-new_encoding(Y_test)
-print("Classes after new encoding ", np.unique(Y_train))
-print("Shape of Y test ", Y_test.shape)
-
+print("Classes before new encoding ", np.unique(Y_train_noaug))
+new_encoding(Y_train_noaug)
+new_encoding(Y_train_sel_aug)
+print("Classes after new encoding ", np.unique(Y_train_noaug))
+print("Shape of Y test ", Y_train_sel_aug.shape)
+print("Shape of Y train", Y_train_noaug.shape)
 
 def create_dictionary(arr: np.ndarray) -> dict:
     labels = {}
@@ -29,15 +29,17 @@ def create_dictionary(arr: np.ndarray) -> dict:
             labels[arr[i, 0]] = 1
     return labels
 
-train_labels = np.unique(Y_train, return_counts=True)
-test_labels = np.unique(Y_test, return_counts=True)
-plt.bar(train_labels[0], train_labels[1])
-plt.title("Label distribution of training set")
-plt.xticks(list(train_labels[0]))
+no_aug_labels = np.unique(Y_train_noaug, return_counts=True)
+sel_aug_labels = np.unique(Y_train_sel_aug, return_counts=True)
+plt.bar(no_aug_labels[0], no_aug_labels[1])
+plt.title("Label distribution of training set before augmentation")
+plt.xticks(list(no_aug_labels[0]))
+fig = plt.gcf()
+fig.set_size_inches(12.0, 8)
 plt.show()
-plt.bar(test_labels[0], test_labels[1])
-plt.title("Label distribution of test set")
-plt.xticks(list(test_labels[0]))
+plt.bar(sel_aug_labels[0], sel_aug_labels[1])
+plt.title("Label distribution of training set after augmentation")
+plt.xticks(list(sel_aug_labels[0]))
 fig = plt.gcf()
 fig.set_size_inches(12.0, 8)
 plt.show()
@@ -54,13 +56,14 @@ mappings = create_mapping(labels_csv)
 print(mappings)
 print("Sorted labels ", sorted(list(mappings.values())))
 
-# conf_matrix_cfcc = np.array(json.load(open("Results/Experiment_cfcc_pain", "r"))['Confusion matrix'])
-# print("Length of conf matrix cfcc ", len(conf_matrix_cfcc[0]))
-# conf_matrix_catloss = np.array(json.load(open("Results/Experiment_cat_loss_pain", "r"))['Confusion matrix'])
-# disp = ConfusionMatrixDisplay(confusion_matrix=conf_matrix_cfcc, display_labels=np.array(list(range(1, 28))))
-# fig, ax = plt.subplots(figsize=(16, 16))
-# plt.rcParams.update({'font.size': 16})
-# disp.plot(ax=ax)
+conf_matrix_cfcc = np.array(json.load(open("Results/Experiment_cfcc_pain", "r"))['Confusion matrix'])
+print("Length of conf matrix cfcc ", len(conf_matrix_cfcc[0]))
+conf_matrix_catloss = np.array(json.load(open("Results/Experiment_cfcc_pain_new-encoding", "r"))['Confusion matrix'])
+disp = ConfusionMatrixDisplay(confusion_matrix=conf_matrix_cfcc, display_labels=np.array(list(range(1, 19))))
+fig, ax = plt.subplots(figsize=(16, 16))
+plt.rcParams.update({'font.size': 16})
+disp.plot(ax=ax, include_values=False)
+plt.show()
 def find_key_from_value(to_search: dict, searchkey):
     for key, value in to_search.items():
         if value==searchkey:
@@ -77,28 +80,37 @@ labels_dict = {}
 for key, value in conversion_dict_reversed.items():
     for keys in value:
         labels_dict[key] = find_key_from_value(mappings, keys)
-print(labels_dict)
+print("Labels dict ", labels_dict)
 conf_matrix= np.array(json.load(open("Results/Experiment_3s_cfcc_shuffled_full-augmentation", "r"))['Confusion matrix'])
 print("Length of conf_matrix", len(conf_matrix))
-disp = ConfusionMatrixDisplay(confusion_matrix=conf_matrix, display_labels=np.array(list(range(0, 8))))
-fig, ax = plt.subplots(figsize=(16, 16))
+original_labels = [12, 15, 1, 8, 2, 3, 14, 11, 10]
+conf_matrix = conf_matrix / conf_matrix.astype(np.float).sum(axis=1, keepdims=True)
+disp = ConfusionMatrixDisplay(confusion_matrix=conf_matrix,
+                              display_labels=[labels_dict[original_labels[i]][0:15] for i in range(len(original_labels))])
+#disp.ax_.set(xlabel='Predicted label')
+fig, ax = plt.subplots(figsize=(20, 20))
+ax.set(xticklabels='')
 plt.legend()
 plt.rcParams.update({'font.size': 16})
-disp.plot(ax=ax)
+disp.plot(ax=ax, xticks_rotation=45)
 plt.show()
 # To help figure out this key
-original_labels = to_predict = [1, 2, 3, 8, 12, 14, 15, 9]
 for i in range(0, 8):
     print("Label nr ", i, "corresponds to ", labels_dict[original_labels[i]])
 
 # Let’s create a readable bar chart
 original_label_counts = {}
-label_counts = create_dictionary(Y_train)
+label_counts = create_dictionary(Y_train_noaug)
 for i in range(len(original_labels)):
     original_label_counts[i] = label_counts[original_labels[i]]
 
+plt.figure(figsize=(18, 20))
 plt.bar(*zip(*original_label_counts.items()))
-plt.xticks(list(range(0, 8)))
+plt.xticks(list(range(0, 8)),
+           labels=[labels_dict[original_labels[i]][0:12] for i in range(len(original_labels))],
+           rotation=60, fontsize='34')
+fig.subplots_adjust(bottom=0.2)
+plt.tight_layout()
 plt.show()
 def sample_every_n(arr, n=10, m=10):
     to_return = []

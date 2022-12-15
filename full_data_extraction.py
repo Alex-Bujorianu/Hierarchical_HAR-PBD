@@ -18,17 +18,17 @@ X = np.arange(1, 13)
 print("Final result: ", window(X, 4, 1, 0.5))
 X = np.arange(1, 17)
 print("Another test: ", window(X, 4, 1, 0.5))
-time = 12
+time = 6
 X, Y = get_all_data("EmoPainAtHomeFull", time=time, sampling_rate=40)
 n_windows = X.shape[0]
-X = downsample(X)
-assert X.shape[1] == (time * 10)
+# X = downsample(X)
+assert X.shape[1] == (time * 40)
 assert X.shape[0] == n_windows
 assert X.shape[2] == 6
 # Healthy participants were sampled at 10Hz
-X_healthy, Y_healthy = get_all_data("EmoPainHealthy", time=time, sampling_rate=10)
-X = np.concatenate((X, X_healthy), axis=0)
-Y = np.concatenate((Y, Y_healthy), axis=0)
+# X_healthy, Y_healthy = get_all_data("EmoPainHealthy", time=time, sampling_rate=10)
+# X = np.concatenate((X, X_healthy), axis=0)
+# Y = np.concatenate((Y, Y_healthy), axis=0)
 print("Shape of X: ", X.shape)
 print("Shape of Y: ", Y.shape)
 # Performance is bad with 50% overlap
@@ -106,7 +106,7 @@ def make_positive(input_arr: np.ndarray) -> np.ndarray:
 make_positive(X_train)
 
 # Save
-np.save(arr=X_train, file="Data/X_train_full_12s")
-np.save(arr=Y_train, file="Data/Y_train_full_12s")
-np.save(arr=X_test, file="Data/X_test_full_12s")
-np.save(arr=Y_test, file="Data/Y_test_full_12s")
+np.save(arr=X_train, file="Data/X_train_6s_40hz_pain")
+np.save(arr=Y_train, file="Data/Y_train_6s_40hz_pain")
+np.save(arr=X_test, file="Data/X_test_6s_40hz_pain")
+np.save(arr=Y_test, file="Data/Y_test_6s_40hz_pain")

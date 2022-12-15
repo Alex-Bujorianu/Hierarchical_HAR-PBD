@@ -8,6 +8,21 @@ from json import JSONDecodeError
 import os
 from statistics import mean
 
+def merge_walking(Y_train, Y_test, Y_validation=None):
+    merge_walking = {14: 14, 18: 14}
+    for i in range(Y_train.shape[0]):
+        if (Y_train[i][0] == 18) or (Y_train[i][0] == 14):
+            Y_train[i][0] = merge_walking[Y_train[i][0]]
+
+    for i in range(Y_test.shape[0]):
+        if (Y_test[i][0] == 18) or (Y_test[i][0] == 14):
+            Y_test[i][0] = merge_walking[Y_test[i][0]]
+
+    if Y_validation is not None:
+        for i in range(Y_validation.shape[0]):
+            if (Y_validation[i][0] == 18) or (Y_validation[i][0] == 14):
+                Y_validation[i][0] = merge_walking[Y_validation[i][0]]
+
 def rolling_mean(arr, ratio) -> np.ndarray:
     "Arr should be 1D array-like"
     assert type(ratio) == int
@@ -39,6 +54,18 @@ def max_scale(arr: np.ndarray) -> np.ndarray:
         for j in range(arr.shape[1]):
             new_arr[i, j] = arr[i, j] / maximum
     return new_arr
+
+def max_scale_all(X_train, X_test, X_validation=None):
+    for i in range(X_train.shape[2]):
+        for j in range(X_train.shape[3]):
+            X_train[:, :, i, j] = max_scale(X_train[:, :, i, j])
+    for i in range(X_test.shape[2]):
+        for j in range(X_test.shape[3]):
+            X_test[:, :, i, j] = max_scale(X_test[:, :, i, j])
+    if X_validation is not None:
+        for i in range(X_validation.shape[2]):
+            for j in range(X_validation.shape[3]):
+                X_validation[:, :, i, j] = max_scale(X_validation[:, :, i, j])
 
 
 # Labels 9, 11 and 20 are basically the same thing

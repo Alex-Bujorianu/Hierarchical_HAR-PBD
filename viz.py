@@ -58,7 +58,7 @@ print("Sorted labels ", sorted(list(mappings.values())))
 
 conf_matrix_cfcc = np.array(json.load(open("Results/Experiment_cfcc_pain", "r"))['Confusion matrix'])
 print("Length of conf matrix cfcc ", len(conf_matrix_cfcc[0]))
-conf_matrix_catloss = np.array(json.load(open("Results/Experiment_cfcc_pain_new-encoding", "r"))['Confusion matrix'])
+conf_matrix_catloss = np.array(json.load(open("Results/9_labels/Experiment_9_labels_cfcc_3s_full", "r"))['Confusion matrix'])
 disp = ConfusionMatrixDisplay(confusion_matrix=conf_matrix_cfcc, display_labels=np.array(list(range(1, 19))))
 fig, ax = plt.subplots(figsize=(16, 16))
 plt.rcParams.update({'font.size': 16})
@@ -81,15 +81,15 @@ for key, value in conversion_dict_reversed.items():
     for keys in value:
         labels_dict[key] = find_key_from_value(mappings, keys)
 print("Labels dict ", labels_dict)
-conf_matrix= np.array(json.load(open("Results/Experiment_3s_cfcc_shuffled_full-augmentation", "r"))['Confusion matrix'])
+conf_matrix= np.array(json.load(open("Results/Experiment_9_labels_cfcc_3s_40hz_pain", "r"))['Confusion matrix'])
 print("Length of conf_matrix", len(conf_matrix))
 original_labels = [12, 15, 1, 8, 2, 3, 14, 11, 10]
 conf_matrix = conf_matrix / conf_matrix.astype(np.float).sum(axis=1, keepdims=True)
 disp = ConfusionMatrixDisplay(confusion_matrix=conf_matrix,
-                              display_labels=[labels_dict[original_labels[i]][0:15] for i in range(len(original_labels))])
+                              display_labels=[labels_dict[original_labels[i]] for i in range(len(original_labels))])
 #disp.ax_.set(xlabel='Predicted label')
 fig, ax = plt.subplots(figsize=(20, 20))
-ax.set(xticklabels='')
+fig.subplots_adjust(bottom=0.2, left=0.2)
 plt.legend()
 plt.rcParams.update({'font.size': 16})
 disp.plot(ax=ax, xticks_rotation=45)
@@ -106,7 +106,7 @@ for i in range(len(original_labels)):
 
 plt.figure(figsize=(18, 20))
 plt.bar(*zip(*original_label_counts.items()))
-plt.xticks(list(range(0, 8)),
+plt.xticks(list(range(0, 9)),
            labels=[labels_dict[original_labels[i]][0:12] for i in range(len(original_labels))],
            rotation=60, fontsize='34')
 fig.subplots_adjust(bottom=0.2)

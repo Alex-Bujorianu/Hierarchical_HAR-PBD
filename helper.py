@@ -23,6 +23,35 @@ def merge_walking(Y_train, Y_test, Y_validation=None):
             if (Y_validation[i][0] == 18) or (Y_validation[i][0] == 14):
                 Y_validation[i][0] = merge_walking[Y_validation[i][0]]
 
+def pick_labels(to_predict, X_train, X_test, Y_train, Y_test, Y_validation=None, X_validation=None):
+    # Get indices of X&Y
+    # If you pass one, you have to pass both
+    if (Y_validation is not None) or (X_validation is not None):
+        assert X_validation is not None
+        assert Y_validation is not None
+    indices_train = []
+    indices_test = []
+    indices_validation = []
+    for activity_label in to_predict:
+        for index in np.where(Y_train[:, 0] == activity_label)[0]:
+            indices_train.append(index)
+        for index in np.where(Y_test[:, 0] == activity_label)[0]:
+            indices_test.append(index)
+        if Y_validation is not None:
+            for index in np.where(Y_validation[:, 0] == activity_label)[0]:
+                indices_validation.append(index)
+
+    # Subset
+    X_train_new = X_train[indices_train]
+    X_test_new = X_test[indices_test]
+    Y_train_new = Y_train[indices_train]
+    Y_test_new = Y_test[indices_test]
+    if Y_validation is not None:
+        X_validation_new = X_validation[indices_validation]
+        Y_validation_new = Y_validation[indices_validation]
+        return (X_train_new, X_test_new, Y_train_new, Y_test_new, X_validation_new, Y_validation_new)
+    return (X_train_new, X_test_new, Y_train_new, Y_test_new)
+
 def rolling_mean(arr, ratio) -> np.ndarray:
     "Arr should be 1D array-like"
     assert type(ratio) == int

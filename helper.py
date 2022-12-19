@@ -8,6 +8,14 @@ from json import JSONDecodeError
 import os
 from statistics import mean
 
+def new_encoding(arr: np.ndarray):
+    conversion_dict = {1: 1, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7,
+                       9:8, 10:11, 11:8, 14:9, 17:10, 18:11, 20:8,
+                       21:12, 22:13, 23:14, 24:15, 25:16, 26:17, 27:18}
+    for i in range(arr.shape[0]):
+        arr[i][0] = conversion_dict[arr[i][0]]
+
+
 def merge_walking(Y_train, Y_test, Y_validation=None):
     merge_walking = {14: 14, 18: 14}
     for i in range(Y_train.shape[0]):

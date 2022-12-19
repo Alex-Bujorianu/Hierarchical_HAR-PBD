@@ -1,0 +1,10 @@
+{
+  "hidden_layer_sizes": [500, 200, 100],
+  "batch_size": 150,
+  "activation": "relu",
+  "beta_1": 0.806,
+  "beta_2": 0.997,
+  "epsilon": 0.00585,
+  "learning_rate_init": 0.00497,
+  "f1_score": 0.925
+}

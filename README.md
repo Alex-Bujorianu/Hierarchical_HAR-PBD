@@ -18,6 +18,8 @@ including the confusion matrix as well as accuracy, F1 score etc. They are JSON 
 
 The Models folder contains saved Tensorflow models.
 
+Important note: the data is not contained in this repository for legal reasons. Please ask the data owner for permission to use the EmoPainAtHome dataset.
+
 ## MyHAR files
 
 The my_HAR.ipynb and my_HAR.py both do the same thing. The Jupyter notebook exists only for use with Google Colab.

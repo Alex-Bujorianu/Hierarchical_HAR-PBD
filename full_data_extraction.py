@@ -10,7 +10,7 @@ from helper import create_mapping, window, convert_windowed_array_to_shape, \
     get_all_data, downsample
 import matplotlib.pyplot as plt
 
-labels_csv = pd.read_csv("EmoPainAtHomeFull/labels.csv")
+labels_csv = pd.read_csv("EmoPainAtHomePain/labels.csv")
 print("Label numbers in order: ", sorted(list(create_mapping(labels_csv).values())))
 
 

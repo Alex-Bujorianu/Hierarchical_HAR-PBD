@@ -40,4 +40,18 @@ Option 2:
 Option 2 is a lot worse than option 1.
 
 ## Increasing time window
-Increasing the time window gives the model more data to recognise an activity, but, it effectively reduces the number of training instances. I think the learning rate should be larger to account for that.
+Increasing the time window gives the model more data to recognise an activity, but, it effectively reduces the number of training instances.
+Additionally, since there are more frames to backpropagate from, the learning rate needs to be reduced and the decay increased.
+
+## Autoencoder experiments
+
+Currently, we have good performance on the training and validation sets,
+of about 80% accuracy and F1 score, but very bad performance on the test set (about 16% accuracy).
+
+I think this may be because the autoencoder is overfitting, so that the test embeddings are very different from the train embeddings,
+even though the input data is similar.
+
+At 50 epochs, the model has 80% validation accuracy.
+
+When adding the sub-activity labels, using the same hyperparameters, the validation accuracy is about 80%, no worse and no better.
+This is unsurprising given that the sub-activity labels (e.g. sit-to-stand) are common across the higher-level activities we are trying to predict (e.g. loading dishwasher, loading washing machine) meaning that the sub-activities are not discriminative.

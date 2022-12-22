@@ -6,6 +6,13 @@ from sklearn.metrics import accuracy_score, \
 from helper import merge_walking, pick_labels, new_encoding
 import matplotlib.pyplot as plt
 import json
+from sklearn.preprocessing import OneHotEncoder
+
+def take_argmax(activities_array):
+    new_activities = np.empty(shape=(activities_array.shape[0]))
+    for i in range(activities_array.shape[0]):
+        new_activities[i] = np.argmax(activities_array[i, :])
+    return new_activities
 
 def plot_train_test_loss(predictor, X_train, Y_train, X_test, Y_test, N_EPOCHS=200, N_BATCH=200):
     N_TRAIN_SAMPLES = X_train.shape[0]
@@ -70,8 +77,27 @@ print("Classes in Y_train: ", np.unique(Y_train), "Classes in Y test: ", np.uniq
 print("X_train shape: ", X_train.shape)
 print("Y_train shape: ", Y_train.shape)
 embeddings_train, activities_train = autofeats_extract(X_train, "autoencoder.hdf5")
+print("Shape of activities train ", activities_train.shape)
+print("First 5 activities ", activities_train[0:5])
+# I am guessing the activities are probabilities so select the most likely
+new_activities_train = take_argmax(activities_train)
+print(new_activities_train[0:5])
+new_activities_train = new_activities_train.reshape(-1, 1)
+encoder = OneHotEncoder(sparse=False)
+new_activities_train = encoder.fit_transform(new_activities_train)
+print("New activities train ", new_activities_train[0:5])
+print("Shape of new activities train: ", new_activities_train.shape)
+print("Shape of embeddings train ", embeddings_train.shape)
+# Add the columns
+print(type(embeddings_train))
+embeddings_train = np.hstack((embeddings_train, new_activities_train))
 #print("Embeddings train: ", embeddings_train[0:10, :])
 embeddings_test, activities_test = autofeats_extract(X_test, "autoencoder.hdf5")
+new_activities_test = take_argmax(activities_test)
+new_activities_test = new_activities_test.reshape(-1, 1)
+new_activities_test = encoder.fit_transform(new_activities_test)
+embeddings_test = np.hstack((embeddings_test, new_activities_test))
+assert embeddings_test.shape[0] == X_test.shape[0]
 print("Shape of embeddings train: ", embeddings_train.shape)
 print("Shape of embeddings test: ", embeddings_test.shape)
 print("Subset of embeddings_train ", embeddings_train[0:5],
@@ -96,14 +122,12 @@ plt.title("Loss during training")
 plt.show()
 print("Activation function in the output layer: ", neural_network.out_activation_)
 print("Train predictions (sanity check): ", neural_network.predict(embeddings_train))
+print("Y train: ", Y_train)
 predictions = neural_network.predict(embeddings_test)
+print("Predictions (test set): ", predictions)
 print("Shape of predictions: ", predictions.shape)
-print("Predictions: ", predictions[500:510])
-print("Y test: ", Y_test[500:510])
+print("Y test: ", Y_test)
 # I noticed something odd
-
-# Y_test = encoder.inverse_transform(Y_test)
-# predictions = encoder.inverse_transform(predictions)
 print_scores(Y_test, predictions)
 conf_matrix = confusion_matrix(Y_test, predictions)
 disp = ConfusionMatrixDisplay(conf_matrix)

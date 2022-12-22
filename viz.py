@@ -43,7 +43,7 @@ plt.xticks(list(sel_aug_labels[0]))
 fig = plt.gcf()
 fig.set_size_inches(12.0, 8)
 plt.show()
-labels_csv = pd.read_csv("EmoPainAtHomeFull/labels.csv")
+labels_csv = pd.read_csv("EmoPainAtHomePain/labels.csv")
 def create_mapping(data: pd.DataFrame) -> dict:
     mappings = {}
     labels = data['Activity'].to_list()

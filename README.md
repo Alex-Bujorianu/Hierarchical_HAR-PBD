@@ -14,7 +14,7 @@ The folder named Data contains the data, split, windowed and angled, as numpy ar
 Healthy and pain refer to EmoPainHealthy and EmoPainAtHomeFull respectively.
 
 The results folder contains the results of the different experiments,
-including the confusion matrix as well as accuracy, F1 score etc.
+including the confusion matrix as well as accuracy, F1 score etc. They are JSON files.
 
 The Models folder contains saved Tensorflow models.
 
